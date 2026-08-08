@@ -11,7 +11,7 @@
 :root{
   --mist:#EDF2F5; --paper:#FFFFFF; --ink:#16303F; --slate:#5B7386;
   --rain:#1F78B4; --rain-deep:#0B4F7E; --snow:#7FA6CC; --snow-deep:#4E7EA8;
-  --amber:#D98E2B; --line:#D8E2E8; --cell:#F3F7FA;
+  --amber:#D98E2B; --line:#D8E2E8; --cell:#F3F7FA; --hot:#C05238; --cold:#3E6FA3;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
@@ -50,7 +50,14 @@ header{padding:26px 0 14px;border-bottom:1px solid var(--line)}
 .gauge{height:5px;background:var(--cell);border-radius:3px;margin-top:10px;overflow:hidden}
 .gauge i{display:block;height:100%;background:var(--rain);border-radius:3px;width:0;transition:width .6s ease}
 .gauge.over i{background:var(--rain-deep)}
+.gauge.sun i{background:#E2921C}
+.gauge.sun.over i{background:#AC5D08}
 .stat .vs{font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--slate);margin-top:5px}
+.stat .big .hot{color:var(--hot)}
+.stat .big .cold{color:var(--cold)}
+.trendnote{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--slate);margin-top:10px}
+.trendnote b{color:var(--hot)}
+.trendnote b.cool{color:var(--cold)}
 
 .drought{font-family:'IBM Plex Mono',monospace;font-size:.74rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;display:inline-block;padding:7px 12px;margin-top:12px}
 .drought b{color:var(--rain-deep)}
@@ -68,8 +75,10 @@ section h2 .hint{font-family:'IBM Plex Mono',monospace;font-size:.62rem;font-wei
 .dow div{font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--slate);text-align:center;letter-spacing:.05em;margin-bottom:4px}
 .day{aspect-ratio:1;border-radius:6px;background:var(--cell);position:relative;cursor:pointer;border:1px solid transparent}
 .day.empty{background:transparent;cursor:default}
-.day .n{position:absolute;top:3px;left:5px;font-family:'IBM Plex Mono',monospace;font-size:.56rem;color:var(--slate)}
-.day.wet .n{color:#fff;mix-blend-mode:normal}
+.day .n{position:absolute;top:2px;left:4px;font-family:'IBM Plex Mono',monospace;font-size:.52rem;color:var(--slate)}
+.day .amt{position:absolute;left:0;right:0;bottom:16%;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.58rem;font-weight:600;color:var(--rain-deep);letter-spacing:-.02em}
+@media(min-width:640px){.day .amt{font-size:.68rem}}
+.day.dark .n,.day.dark .amt{color:#fff}
 .day.today{border-color:var(--ink)}
 .day.sel{outline:2px solid var(--amber)}
 .logline{font-family:'IBM Plex Mono',monospace;font-size:.72rem;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);color:var(--ink);min-height:1.2em}
@@ -98,7 +107,7 @@ footer a{color:var(--rain-deep)}
   </div>
   <div class="tabs" id="tabs"></div>
   <div class="mtoggle" role="group" aria-label="Metric">
-    <button id="mRain" class="on">RAIN ″</button><button id="mSnow">SNOW ″</button>
+    <button id="mRain" class="on">RAIN ″</button><button id="mSnow">SNOW ″</button><button id="mSun">SUN kWh/m²</button>
   </div>
   <div class="statusline" id="status">Loading recent observations…</div>
 </header>
@@ -130,6 +139,15 @@ footer a{color:var(--rain-deep)}
 </section>
 
 <section>
+  <h2>Temperature <span class="hint" id="tempHint">TODAY VS NORMAL · RECORDS SINCE 1940</span></h2>
+  <div class="stats" id="tempStats"></div>
+  <div class="chartcard">
+    <div class="chartbox"><canvas id="tempChart"></canvas></div>
+    <div class="trendnote" id="trendNote"></div>
+  </div>
+</section>
+
+<section>
   <h2>Yearly totals since 1940 <span class="hint">DASHED = LONG-RUN AVERAGE</span></h2>
   <div class="chartcard">
     <div class="chartbox"><canvas id="yearlyChart"></canvas></div>
@@ -137,7 +155,7 @@ footer a{color:var(--rain-deep)}
 </section>
 
 <footer class="wrap-inner">
-  Data: <a href="https://open-meteo.com/">Open-Meteo</a> (recent: NOAA model analysis · history: ERA5 reanalysis, 1940–present). Amounts are gridded estimates in inches for the exact coordinates shown — like a virtual gauge, they can differ slightly from any physical gauge nearby. History is cached in your browser and refreshed daily.
+  Data: <a href="https://open-meteo.com/">Open-Meteo</a> (recent: NOAA model analysis · history: ERA5 reanalysis, 1940–present). Amounts are gridded estimates in inches for the exact coordinates shown — like a virtual gauge, they can differ slightly from any physical gauge nearby. Solar is total shortwave irradiation on a horizontal surface; kWh/m²/day ≈ "peak sun hours" (multiply by your array's kW rating × ~0.8 for a rough daily output estimate — tilted panels collect somewhat more in winter). History is cached in your browser and refreshed daily.
 </footer>
 
 </div>
@@ -160,18 +178,18 @@ async function fetchJSON(url){const r=await fetch(url);if(!r.ok)throw new Error(
 
 async function loadRecent(loc){
   const u=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`+
-    `&daily=precipitation_sum,snowfall_sum&hourly=precipitation,snowfall`+
-    `&past_days=31&forecast_days=1&timezone=auto&precipitation_unit=inch`;
+    `&daily=precipitation_sum,snowfall_sum,temperature_2m_max,temperature_2m_min,shortwave_radiation_sum&hourly=precipitation,snowfall`+
+    `&past_days=31&forecast_days=1&timezone=auto&precipitation_unit=inch&temperature_unit=fahrenheit`;
   return fetchJSON(u);
 }
 async function loadHistory(loc){
-  const key="gaugelog_hist_"+loc.id;
+  const key="gaugelog_hist_v3_"+loc.id;
   const today=todayStr();
   try{const c=JSON.parse(localStorage.getItem(key));
       if(c&&c.savedOn===today&&c.daily)return c;}catch(e){}
   const u=`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lon}`+
     `&start_date=${HIST_START}&end_date=${today}`+
-    `&daily=precipitation_sum,snowfall_sum&timezone=auto&precipitation_unit=inch`;
+    `&daily=precipitation_sum,snowfall_sum,temperature_2m_max,temperature_2m_min,shortwave_radiation_sum&timezone=auto&precipitation_unit=inch&temperature_unit=fahrenheit`;
   const j=await fetchJSON(u);
   const out={savedOn:today,daily:j.daily};
   try{localStorage.setItem(key,JSON.stringify(out));}catch(e){/* storage full or unavailable — fine */}
@@ -181,16 +199,16 @@ async function loadHistory(loc){
 /* Merge archive (long, lags ~5 days) with recent model days into one map date -> {r,s} */
 function buildSeries(hist,recent){
   const map=new Map();
-  const hd=hist.daily;
-  for(let i=0;i<hd.time.length;i++){
-    const r=hd.precipitation_sum[i],s=hd.snowfall_sum[i];
-    if(r!=null||s!=null)map.set(hd.time[i],{r:r??0,s:s??0});
-  }
-  const rd=recent.daily;
-  for(let i=0;i<rd.time.length;i++){
-    const r=rd.precipitation_sum[i],s=rd.snowfall_sum[i];
-    if(r!=null||s!=null)map.set(rd.time[i],{r:r??0,s:s??0});
-  }
+  const put=(d,i)=>{
+    const r=d.precipitation_sum[i],s=d.snowfall_sum[i];
+    const hi=d.temperature_2m_max?d.temperature_2m_max[i]:null;
+    const lo=d.temperature_2m_min?d.temperature_2m_min[i]:null;
+    const sw=d.shortwave_radiation_sum?d.shortwave_radiation_sum[i]:null;
+    const sol=sw==null?null:sw/3.6; /* MJ/m² -> kWh/m² */
+    if(r!=null||s!=null||hi!=null)map.set(d.time[i],{r:r??0,s:s??0,hi,lo,sol});
+  };
+  for(let i=0;i<hist.daily.time.length;i++)put(hist.daily,i);
+  for(let i=0;i<recent.daily.time.length;i++)put(recent.daily,i);
   return map;
 }
 
@@ -210,16 +228,16 @@ function computeAll(loc,hist,recent){
     }
   }
 
-  const sumRange=(days)=>{let r=0,s=0;
+  const sumRange=(days)=>{let r=0,s=0,sol=0;
     for(let i=0;i<days;i++){const d=new Date(now);d.setDate(d.getDate()-i);
       const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-      const v=series.get(k);if(v){r+=v.r;s+=v.s;}}
-    return{r,s};};
+      const v=series.get(k);if(v){r+=v.r;s+=v.s;sol+=v.sol||0;}}
+    return{r,s,sol};};
   const d7=sumRange(7),d30=sumRange(30);
 
   /* YTD */
-  let ytdR=0,ytdS=0;const yNow=now.getFullYear();
-  for(const[k,v]of series){if(k.startsWith(yNow+"")){ytdR+=v.r;ytdS+=v.s;}}
+  let ytdR=0,ytdS=0,ytdSol=0;const yNow=now.getFullYear();
+  for(const[k,v]of series){if(k.startsWith(yNow+"")){ytdR+=v.r;ytdS+=v.s;ytdSol+=v.sol||0;}}
 
   /* days since measurable (>=0.01" rain or >=0.1" snow) */
   let since=null;
@@ -228,51 +246,98 @@ function computeAll(loc,hist,recent){
     const v=series.get(k);if(v&&(v.r>=0.01||v.s>=0.1)){since=i;break;}}
 
   /* monthly totals per year + normals */
-  const monthly={}; /* year -> [12] of {r,s} */
+  const monthly={}; /* year -> [12] of {r,s,sol} */
   for(const[k,v]of series){
     const y=+k.slice(0,4),m=+k.slice(5,7)-1;
-    (monthly[y]??=Array.from({length:12},()=>({r:0,s:0})));
-    monthly[y][m].r+=v.r;monthly[y][m].s+=v.s;
+    (monthly[y]??=Array.from({length:12},()=>({r:0,s:0,sol:0})));
+    monthly[y][m].r+=v.r;monthly[y][m].s+=v.s;monthly[y][m].sol+=v.sol||0;
   }
-  const normalM=Array.from({length:12},()=>({r:0,s:0}));
+  const normalM=Array.from({length:12},()=>({r:0,s:0,sol:0}));
   let nY=0;
-  for(let y=NORM_Y0;y<=NORM_Y1;y++){if(monthly[y]){nY++;for(let m=0;m<12;m++){normalM[m].r+=monthly[y][m].r;normalM[m].s+=monthly[y][m].s;}}}
-  if(nY>0)for(let m=0;m<12;m++){normalM[m].r/=nY;normalM[m].s/=nY;}
+  for(let y=NORM_Y0;y<=NORM_Y1;y++){if(monthly[y]){nY++;for(let m=0;m<12;m++){normalM[m].r+=monthly[y][m].r;normalM[m].s+=monthly[y][m].s;normalM[m].sol+=monthly[y][m].sol;}}}
+  if(nY>0)for(let m=0;m<12;m++){normalM[m].r/=nY;normalM[m].s/=nY;normalM[m].sol/=nY;}
 
   /* yearly totals (exclude current partial year from average) */
   const years=Object.keys(monthly).map(Number).sort((a,b)=>a-b);
-  const yearly=years.map(y=>({y,r:monthly[y].reduce((a,b)=>a+b.r,0),s:monthly[y].reduce((a,b)=>a+b.s,0)}));
+  const yearly=years.map(y=>({y,r:monthly[y].reduce((a,b)=>a+b.r,0),s:monthly[y].reduce((a,b)=>a+b.s,0),sol:monthly[y].reduce((a,b)=>a+b.sol,0)}));
   const full=yearly.filter(o=>o.y<yNow);
   const avgR=full.length?full.reduce((a,b)=>a+b.r,0)/full.length:0;
   const avgS=full.length?full.reduce((a,b)=>a+b.s,0)/full.length:0;
+  const avgSol=full.length?full.reduce((a,b)=>a+b.sol,0)/full.length:0;
 
   /* normals for gauge bars: 30-day normal ≈ avg annual/365*30 refined by current month mix; YTD normal via monthly proration */
   const doy=Math.floor((now-new Date(yNow,0,0))/86400000);
   const dim=[31,28.25,31,30,31,30,31,31,30,31,30,31];
-  let ytdNormR=0,ytdNormS=0,acc=0;
+  let ytdNormR=0,ytdNormS=0,ytdNormSol=0,acc=0;
   for(let m=0;m<12;m++){
     const take=Math.max(0,Math.min(dim[m],doy-acc));
-    ytdNormR+=normalM[m].r*(take/dim[m]);ytdNormS+=normalM[m].s*(take/dim[m]);acc+=dim[m];
+    ytdNormR+=normalM[m].r*(take/dim[m]);ytdNormS+=normalM[m].s*(take/dim[m]);ytdNormSol+=normalM[m].sol*(take/dim[m]);acc+=dim[m];
   }
   const m0=now.getMonth();
-  const n30R=(normalM[m0].r/dim[m0])*30,n30S=(normalM[m0].s/dim[m0])*30;
+  const n30R=(normalM[m0].r/dim[m0])*30,n30S=(normalM[m0].s/dim[m0])*30,n30Sol=(normalM[m0].sol/dim[m0])*30;
 
-  return{series,h24:{r:h24r,s:h24s},d7,d30,ytd:{r:ytdR,s:ytdS},since,
-         monthly,normalM,yearly,avgR,avgS,
-         norm30:{r:n30R,s:n30S},ytdNorm:{r:ytdNormR,s:ytdNormS},asOf:tISO};
+  /* ---- temperature climatology ---- */
+  /* per calendar date (MM-DD): record hi/lo with years, 1991–2020 normal hi/lo */
+  const temps={}; /* "MM-DD" -> {recHi,recHiY,recLo,recLoY,nHi,nLo,nCt} */
+  const annual={}; /* year -> {sum,ct} of daily mean */
+  for(const[k,v]of series){
+    if(v.hi==null||v.lo==null)continue;
+    const y=+k.slice(0,4),md=k.slice(5);
+    const t=(temps[md]??={recHi:-999,recHiY:0,recLo:999,recLoY:0,nHi:0,nLo:0,nCt:0});
+    if(v.hi>t.recHi){t.recHi=v.hi;t.recHiY=y;}
+    if(v.lo<t.recLo){t.recLo=v.lo;t.recLoY=y;}
+    if(y>=NORM_Y0&&y<=NORM_Y1){t.nHi+=v.hi;t.nLo+=v.lo;t.nCt++;}
+    const a=(annual[y]??={sum:0,ct:0});a.sum+=(v.hi+v.lo)/2;a.ct++;
+  }
+  for(const md in temps){const t=temps[md];if(t.nCt){t.nHi/=t.nCt;t.nLo/=t.nCt;}else{t.nHi=null;t.nLo=null;}}
+  /* annual means, full years only (>=360 days of data) */
+  const annualMean=Object.keys(annual).map(Number).sort((a,b)=>a-b)
+    .filter(y=>annual[y].ct>=360&&y<yNow)
+    .map(y=>({y,t:annual[y].sum/annual[y].ct}));
+  /* least-squares trend over last 20 full years, °F per decade */
+  let trend=null;
+  const last20=annualMean.slice(-20);
+  if(last20.length>=10){
+    const n=last20.length;
+    const mx=last20.reduce((a,o)=>a+o.y,0)/n,my=last20.reduce((a,o)=>a+o.t,0)/n;
+    let num=0,den=0;
+    for(const o of last20){num+=(o.y-mx)*(o.t-my);den+=(o.y-mx)**2;}
+    trend={perDecade:(num/den)*10,y0:last20[0].y,fit:x=>my+(num/den)*(x-mx)};
+  }
+  /* today's hi/lo from merged series */
+  const todayV=series.get(tISO)||{};
+
+  return{series,h24:{r:h24r,s:h24s},d7,d30,ytd:{r:ytdR,s:ytdS,sol:ytdSol},since,
+         monthly,normalM,yearly,avgR,avgS,avgSol,
+         norm30:{r:n30R,s:n30S,sol:n30Sol},ytdNorm:{r:ytdNormR,s:ytdNormS,sol:ytdNormSol},asOf:tISO,
+         temps,annualMean,trend,todayV};
 }
 
 /* ---------- rendering ---------- */
 const RAIN_SCALE=[[0.001,"#DCEAF5"],[0.1,"#B7D4EC"],[0.25,"#8ABBDF"],[0.5,"#5A9FD0"],[1,"#2E82BC"],[2,"#1560A0"],[99,"#0B4F7E"]];
 const SNOW_SCALE=[[0.05,"#E2ECF5"],[0.5,"#C4D9EC"],[1,"#A2C2E0"],[3,"#7FA6CC"],[6,"#5D89B4"],[12,"#456F9C"],[999,"#325780"]];
+const SUN_SCALE=[[1,"#FFF3D1"],[2,"#FFE6A6"],[3.5,"#FDD26E"],[5,"#F5B33C"],[6.5,"#E2921C"],[8,"#C97410"],[999,"#AC5D08"]];
+function metricAmt(v,metric){return metric==="rain"?v.r:metric==="snow"?v.s:(v.sol??0);}
 function cellColor(v,metric){
   if(!v)return null;
-  const amt=metric==="rain"?v.r:v.s;
-  const scale=metric==="rain"?RAIN_SCALE:SNOW_SCALE;
-  const min=metric==="rain"?0.005:0.05;
+  const amt=metricAmt(v,metric);
+  const scale=metric==="rain"?RAIN_SCALE:metric==="snow"?SNOW_SCALE:SUN_SCALE;
+  const min=metric==="rain"?0.005:metric==="snow"?0.05:0.05;
   if(amt<min)return null;
-  for(const[t,c]of scale)if(amt<t||t>=99)return c;
-  return scale[scale.length-1][1];
+  for(let i=0;i<scale.length;i++){
+    if(amt<scale[i][0]||scale[i][0]>=99)return{color:scale[i][1],dark:i>=(metric==="sun"?4:3)};
+  }
+  return{color:scale[scale.length-1][1],dark:true};
+}
+function formatAmt(v,metric){
+  const amt=v?metricAmt(v,metric):0;
+  if(metric==="rain"){
+    if(amt<0.005)return"";
+    if(amt<1)return amt.toFixed(2).replace(/^0/,"");
+    return amt<10?amt.toFixed(1):Math.round(amt)+"";
+  }
+  if(amt<0.05)return"";
+  return amt<10?amt.toFixed(1):Math.round(amt)+"";
 }
 
 function renderTabs(){
@@ -286,20 +351,30 @@ function renderTabs(){
   }
 }
 
-function statCard(label,val,snow,gauge){
+function statCard(label,val,snow,gauge,unit,dec){
   return `<div class="stat"><div class="label">${label}</div>
-    <div class="big">${fmt(val)}<small> in</small></div>
+    <div class="big">${fmt(val,dec??2)}<small> ${unit||"in"}</small></div>
     <div class="snowline">${snow!=null&&snow>=0.05?("❄ "+fmt(snow,1)+"″ snow"):""}</div>
     ${gauge??""}</div>`;
 }
-function gaugeBar(actual,normal,label){
+function gaugeBar(actual,normal,label,cls){
   if(!normal||normal<=0)return"";
   const pct=Math.min(100,actual/normal*100);
-  return `<div class="gauge${actual>normal?" over":""}"><i style="width:${pct}%"></i></div>
-    <div class="vs">${Math.round(actual/normal*100)}% of ${label} normal (${fmt(normal,1)}″)</div>`;
+  return `<div class="gauge${actual>normal?" over":""}${cls?" "+cls:""}"><i style="width:${pct}%"></i></div>
+    <div class="vs">${Math.round(actual/normal*100)}% of ${label} normal (${fmt(normal,1)}${cls?" kWh/m²":"″"})</div>`;
 }
 
 function renderStats(D){
+  if(state.metric==="sun"){
+    const yv=D.todayV&&D.todayV.sol!=null?D.todayV.sol:null;
+    $("stats").innerHTML=
+      statCard("Today",yv,null,"","kWh/m²",1)+
+      statCard("Last 7 days",D.d7.sol,null,"","kWh/m²",1)+
+      statCard("Last 30 days",D.d30.sol,null,gaugeBar(D.d30.sol,D.norm30.sol,"30-day","sun"),"kWh/m²",0)+
+      statCard("Year to date",D.ytd.sol,null,gaugeBar(D.ytd.sol,D.ytdNorm.sol,"YTD","sun"),"kWh/m²",0);
+    $("drought").hidden=true;
+    return;
+  }
   $("stats").innerHTML=
     statCard("Last 24 hrs",D.h24.r,D.h24.s)+
     statCard("Last 7 days",D.d7.r,D.d7.s)+
@@ -312,10 +387,11 @@ function renderStats(D){
 }
 
 function renderLegend(){
-  const scale=state.metric==="rain"?RAIN_SCALE:SNOW_SCALE;
+  const scale=state.metric==="rain"?RAIN_SCALE:state.metric==="snow"?SNOW_SCALE:SUN_SCALE;
+  const end=state.metric==="rain"?"2″+":state.metric==="snow"?"12″+":"8+ kWh";
   $("legend").innerHTML=`<span>0</span><i style="background:var(--cell)"></i>`+
     scale.map(s=>`<i style="background:${s[1]}"></i>`).join("")+
-    `<span>${state.metric==="rain"?"2″+":"12″+"}</span>`;
+    `<span>${end}</span>`;
 }
 
 function renderCalendar(D){
@@ -334,15 +410,21 @@ function renderCalendar(D){
     const el=document.createElement("div");
     el.className="day";
     const c=cellColor(v,state.metric);
-    if(c){el.style.background=c;el.classList.add("wet");}
+    if(c){el.style.background=c.color;el.classList.add("wet");if(c.dark)el.classList.add("dark");}
     if(k===tISO)el.classList.add("today");
     if(k===state.selDay)el.classList.add("sel");
-    el.innerHTML=`<span class="n">${dnum}</span>`;
+    const amt=formatAmt(v,state.metric);
+    el.innerHTML=`<span class="n">${dnum}</span>${amt?`<span class="amt">${amt}</span>`:""}`;
     el.setAttribute("role","button");el.tabIndex=0;
     const pick=()=>{state.selDay=k;renderCalendar(D);
       const d=new Date(y,m,dnum).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"});
-      if(!v){$("logline").innerHTML=`${d} — no data.`;}
-      else{$("logline").innerHTML=`${d} — <b>${fmt(v.r)}″ rain</b>${v.s>=0.05?` · ❄ ${fmt(v.s,1)}″ snow`:""}${(v.r<0.005&&v.s<0.05)?" — dry":""}`;}};
+      if(!v){$("logline").innerHTML=`${d} — no data.`;return;}
+      let line=`${d} — <b>${fmt(v.r)}″ rain</b>${v.s>=0.05?` · ❄ ${fmt(v.s,1)}″ snow`:""}${(v.r<0.005&&v.s<0.05)?" — dry":""}`;
+      if(v.sol!=null)line+=` · ☀ ${v.sol.toFixed(1)} kWh/m²`;
+      if(v.hi!=null)line+=` · H ${Math.round(v.hi)}° / L ${Math.round(v.lo)}°`;
+      const rec=D.temps[k.slice(5)];
+      if(rec&&rec.recHiY)line+=` <span style="color:var(--slate)">(rec ${Math.round(rec.recHi)}° ’${String(rec.recHiY).slice(2)} / ${Math.round(rec.recLo)}° ’${String(rec.recLoY).slice(2)})</span>`;
+      $("logline").innerHTML=line;};
     el.onclick=pick;
     el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}};
     g.appendChild(el);
@@ -357,15 +439,18 @@ function renderMonthly(D){
     sel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join("");
   }
   const y=+sel.value||years[0];sel.value=y;
-  const isRain=state.metric==="rain";
-  const vals=D.monthly[y].map(o=>+(isRain?o.r:o.s).toFixed(2));
-  const norm=D.normalM.map(o=>+(isRain?o.r:o.s).toFixed(2));
+  const M=state.metric;
+  const get=o=>M==="rain"?o.r:M==="snow"?o.s:o.sol;
+  const unit=M==="sun"?" solar (kWh/m²)":M==="rain"?" rain (in)":" snow (in)";
+  const barColor=M==="sun"?"#F5B33C":M==="rain"?"#2E82BC":"#7FA6CC";
+  const vals=D.monthly[y].map(o=>+get(o).toFixed(M==="sun"?0:2));
+  const norm=D.normalM.map(o=>+get(o).toFixed(M==="sun"?0:2));
   const labels=["J","F","M","A","M","J","J","A","S","O","N","D"];
   if(state.charts.monthly)state.charts.monthly.destroy();
   state.charts.monthly=new Chart($("monthlyChart"),{
     data:{labels,datasets:[
-      {type:"bar",label:y+(isRain?" rain (in)":" snow (in)"),data:vals,
-       backgroundColor:isRain?"#2E82BC":"#7FA6CC",borderRadius:3},
+      {type:"bar",label:y+unit,data:vals,
+       backgroundColor:barColor,borderRadius:3},
       {type:"line",label:"1991–2020 normal",data:norm,borderColor:"#D98E2B",
        backgroundColor:"#D98E2B",borderWidth:2,pointRadius:2.5,tension:.3}
     ]},
@@ -373,18 +458,51 @@ function renderMonthly(D){
   });
 }
 
+function renderTemps(D){
+  const now=new Date();
+  const md=todayStr().slice(5);
+  const t=D.temps[md]||{};
+  const v=D.todayV||{};
+  const dateLbl=now.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+  const deg=(x,cls)=>x==null?"–":`<span class="${cls||""}">${Math.round(x)}°</span>`;
+  const dev=(x,n)=>x==null||n==null?"":`<div class="vs">${x-n>=0?"+":""}${Math.round(x-n)}° vs normal ${Math.round(n)}°</div>`;
+  $("tempStats").innerHTML=
+    `<div class="stat"><div class="label">Today high</div><div class="big">${deg(v.hi,"hot")}</div><div class="snowline"></div>${dev(v.hi,t.nHi)}</div>`+
+    `<div class="stat"><div class="label">Today low</div><div class="big">${deg(v.lo,"cold")}</div><div class="snowline"></div>${dev(v.lo,t.nLo)}</div>`+
+    `<div class="stat"><div class="label">Record high · ${dateLbl}</div><div class="big">${deg(t.recHi,"hot")}</div><div class="snowline">${t.recHiY?"set "+t.recHiY:""}</div></div>`+
+    `<div class="stat"><div class="label">Record low · ${dateLbl}</div><div class="big">${deg(t.recLo,"cold")}</div><div class="snowline">${t.recLoY?"set "+t.recLoY:""}</div></div>`;
+
+  const labels=D.annualMean.map(o=>o.y);
+  const vals=D.annualMean.map(o=>+o.t.toFixed(1));
+  const ds=[{type:"line",label:"Annual mean temp (°F)",data:vals,borderColor:"#C05238",
+             backgroundColor:"#C05238",borderWidth:1.5,pointRadius:0,tension:.25}];
+  if(D.trend){
+    ds.push({type:"line",label:"20-yr trend",data:labels.map(y=>y>=D.trend.y0?+D.trend.fit(y).toFixed(2):null),
+             borderColor:"#16303F",borderDash:[5,4],borderWidth:1.4,pointRadius:0});
+    const pd=D.trend.perDecade;
+    $("trendNote").innerHTML=`20-year trend: <b class="${pd<0?"cool":""}">${pd>=0?"+":""}${pd.toFixed(1)}°F per decade</b> · normals & records computed from the full 1940–present ERA5 record for this exact grid point.`;
+  }else $("trendNote").textContent="";
+  if(state.charts.temp)state.charts.temp.destroy();
+  const o=chartOpts(true);o.scales.y.beginAtZero=false;
+  state.charts.temp=new Chart($("tempChart"),{data:{labels,datasets:ds},options:o});
+}
+
 function renderYearly(D){
-  const isRain=state.metric==="rain";
+  const M=state.metric;
+  const get=o=>M==="rain"?o.r:M==="snow"?o.s:o.sol;
   const labels=D.yearly.map(o=>o.y);
-  const vals=D.yearly.map(o=>+(isRain?o.r:o.s).toFixed(1));
-  const avg=isRain?D.avgR:D.avgS;
+  const vals=D.yearly.map(o=>+get(o).toFixed(M==="sun"?0:1));
+  const avg=M==="rain"?D.avgR:M==="snow"?D.avgS:D.avgSol;
+  const barColor=M==="sun"?"#F5B33C":M==="rain"?"#2E82BC":"#7FA6CC";
+  const lbl=M==="sun"?"Annual solar (kWh/m²)":M==="rain"?"Annual precip (in)":"Annual snowfall (in)";
+  const avgLbl="Average "+(M==="sun"?Math.round(avg)+" kWh/m²":fmt(avg,1)+"″");
   if(state.charts.yearly)state.charts.yearly.destroy();
   state.charts.yearly=new Chart($("yearlyChart"),{
     data:{labels,datasets:[
-      {type:"bar",label:isRain?"Annual precip (in)":"Annual snowfall (in)",data:vals,
-       backgroundColor:labels.map(y=>y===new Date().getFullYear()?"#D98E2B":(isRain?"#2E82BC":"#7FA6CC")),
+      {type:"bar",label:lbl,data:vals,
+       backgroundColor:labels.map(y=>y===new Date().getFullYear()?"#D98E2B":barColor),
        borderRadius:2,categoryPercentage:1,barPercentage:.85},
-      {type:"line",label:"Average "+fmt(avg,1)+"″",data:labels.map(()=>+avg.toFixed(1)),
+      {type:"line",label:avgLbl,data:labels.map(()=>+avg.toFixed(1)),
        borderColor:"#16303F",borderDash:[5,4],borderWidth:1.2,pointRadius:0}
     ]},
     options:chartOpts(true)
@@ -401,14 +519,22 @@ function chartOpts(dense){
 
 function renderAll(){
   const D=state.data[state.loc.id];if(!D)return;
-  renderTabs();renderStats(D);renderCalendar(D);renderMonthly(D);renderYearly(D);
+  renderTabs();renderStats(D);renderCalendar(D);renderMonthly(D);renderTemps(D);renderYearly(D);
   $("status").className="statusline";
   $("status").textContent="Updated "+new Date().toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" · history through "+D.asOf;
 }
 
 /* ---------- wiring ---------- */
-$("mRain").onclick=()=>{state.metric="rain";$("mRain").classList.add("on");$("mSnow").classList.remove("on");renderAll();};
-$("mSnow").onclick=()=>{state.metric="snow";$("mSnow").classList.add("on");$("mRain").classList.remove("on");renderAll();};
+function setMetric(m){
+  state.metric=m;
+  $("mRain").classList.toggle("on",m==="rain");
+  $("mSnow").classList.toggle("on",m==="snow");
+  $("mSun").classList.toggle("on",m==="sun");
+  renderAll();
+}
+$("mRain").onclick=()=>setMetric("rain");
+$("mSnow").onclick=()=>setMetric("snow");
+$("mSun").onclick=()=>setMetric("sun");
 $("prevM").onclick=()=>{state.calMonth--;if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar(state.data[state.loc.id]);};
 $("nextM").onclick=()=>{state.calMonth++;if(state.calMonth>11){state.calMonth=0;state.calYear++;}renderCalendar(state.data[state.loc.id]);};
 $("yearSel").onchange=()=>renderMonthly(state.data[state.loc.id]);
@@ -435,4 +561,3 @@ boot();
 </script>
 </body>
 </html>
-
