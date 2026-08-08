@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gauge Log — Darien CT & Park City UT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --mist:#EDF2F5; --paper:#FFFFFF; --ink:#16303F; --slate:#5B7386;
+  --rain:#1F78B4; --rain-deep:#0B4F7E; --snow:#7FA6CC; --snow-deep:#4E7EA8;
+  --amber:#D98E2B; --line:#D8E2E8; --cell:#F3F7FA;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--mist);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;padding-bottom:60px}
+.mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px}
+
+header{padding:26px 0 14px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:1.35rem;font-weight:700;letter-spacing:.04em}
+.brand h1 span{color:var(--rain)}
+.brand .sub{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--slate);letter-spacing:.06em}
+
+.tabs{display:flex;gap:8px;margin:16px 0 4px}
+.tab{flex:1;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;transition:border-color .15s, box-shadow .15s}
+.tab:focus-visible,.mtoggle button:focus-visible,.mnav:focus-visible,select:focus-visible{outline:2px solid var(--rain);outline-offset:2px}
+.tab .name{font-weight:700;font-size:.95rem}
+.tab .coords{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--slate);letter-spacing:.05em;margin-top:2px}
+.tab.active{border-color:var(--rain);box-shadow:0 0 0 1px var(--rain) inset}
+.tab.active .name{color:var(--rain-deep)}
+
+.mtoggle{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0 0}
+.mtoggle button{border:0;background:var(--paper);color:var(--slate);font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.08em;padding:7px 16px;cursor:pointer}
+.mtoggle button.on{background:var(--ink);color:#fff}
+
+.statusline{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--slate);margin:12px 0 0;min-height:1em}
+.statusline.err{color:#A33B2E}
+
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+@media(min-width:640px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 14px 12px}
+.stat .label{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--slate);text-transform:uppercase}
+.stat .big{font-family:'IBM Plex Mono',monospace;font-size:1.7rem;font-weight:600;margin-top:6px;line-height:1.1}
+.stat .big small{font-size:.85rem;font-weight:400;color:var(--slate)}
+.stat .snowline{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--snow-deep);margin-top:4px;min-height:1em}
+.gauge{height:5px;background:var(--cell);border-radius:3px;margin-top:10px;overflow:hidden}
+.gauge i{display:block;height:100%;background:var(--rain);border-radius:3px;width:0;transition:width .6s ease}
+.gauge.over i{background:var(--rain-deep)}
+.stat .vs{font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--slate);margin-top:5px}
+
+.drought{font-family:'IBM Plex Mono',monospace;font-size:.74rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;display:inline-block;padding:7px 12px;margin-top:12px}
+.drought b{color:var(--rain-deep)}
+
+section{margin-top:34px}
+section h2{font-size:1rem;font-weight:700;letter-spacing:.03em;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+section h2 .hint{font-family:'IBM Plex Mono',monospace;font-size:.62rem;font-weight:400;color:var(--slate);letter-spacing:.05em}
+
+.calcard{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.calhead .m{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.9rem;letter-spacing:.05em}
+.mnav{border:1px solid var(--line);background:var(--paper);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:1rem;color:var(--ink)}
+.mnav:disabled{opacity:.3;cursor:default}
+.dow,.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dow div{font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--slate);text-align:center;letter-spacing:.05em;margin-bottom:4px}
+.day{aspect-ratio:1;border-radius:6px;background:var(--cell);position:relative;cursor:pointer;border:1px solid transparent}
+.day.empty{background:transparent;cursor:default}
+.day .n{position:absolute;top:3px;left:5px;font-family:'IBM Plex Mono',monospace;font-size:.56rem;color:var(--slate)}
+.day.wet .n{color:#fff;mix-blend-mode:normal}
+.day.today{border-color:var(--ink)}
+.day.sel{outline:2px solid var(--amber)}
+.logline{font-family:'IBM Plex Mono',monospace;font-size:.72rem;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);color:var(--ink);min-height:1.2em}
+.logline b{color:var(--rain-deep)}
+.legend{display:flex;align-items:center;gap:4px;margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--slate)}
+.legend i{width:14px;height:10px;border-radius:2px;display:inline-block}
+
+.chartcard{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px}
+.chartcard .ctl{display:flex;justify-content:flex-end;margin-bottom:8px}
+select{font-family:'IBM Plex Mono',monospace;font-size:.75rem;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.chartbox{position:relative;height:240px}
+@media(min-width:640px){.chartbox{height:280px}}
+
+footer{margin-top:44px;font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--slate);line-height:1.7}
+footer a{color:var(--rain-deep)}
+@media (prefers-reduced-motion: reduce){.gauge i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">
+    <h1>GAUGE<span> LOG</span></h1>
+    <div class="sub">RADAR-FREE · STATION-STYLE PRECIP RECORD · SOURCE: OPEN-METEO / ERA5 + NOAA GFS</div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="mtoggle" role="group" aria-label="Metric">
+    <button id="mRain" class="on">RAIN ″</button><button id="mSnow">SNOW ″</button>
+  </div>
+  <div class="statusline" id="status">Loading recent observations…</div>
+</header>
+
+<div class="stats" id="stats"></div>
+<div class="drought" id="drought" hidden></div>
+
+<section>
+  <h2>Field log <span class="hint">TAP A DAY FOR THE ENTRY</span></h2>
+  <div class="calcard">
+    <div class="calhead">
+      <button class="mnav" id="prevM" aria-label="Previous month">‹</button>
+      <div class="m" id="calTitle">—</div>
+      <button class="mnav" id="nextM" aria-label="Next month">›</button>
+    </div>
+    <div class="dow"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div>
+    <div class="calgrid" id="calgrid"></div>
+    <div class="logline" id="logline">No entry selected.</div>
+    <div class="legend" id="legend"></div>
+  </div>
+</section>
+
+<section>
+  <h2>Monthly totals <span class="hint">AMBER LINE = 1991–2020 NORMAL</span></h2>
+  <div class="chartcard">
+    <div class="ctl"><select id="yearSel" aria-label="Year"></select></div>
+    <div class="chartbox"><canvas id="monthlyChart"></canvas></div>
+  </div>
+</section>
+
+<section>
+  <h2>Yearly totals since 1940 <span class="hint">DASHED = LONG-RUN AVERAGE</span></h2>
+  <div class="chartcard">
+    <div class="chartbox"><canvas id="yearlyChart"></canvas></div>
+  </div>
+</section>
+
+<footer class="wrap-inner">
+  Data: <a href="https://open-meteo.com/">Open-Meteo</a> (recent: NOAA model analysis · history: ERA5 reanalysis, 1940–present). Amounts are gridded estimates in inches for the exact coordinates shown — like a virtual gauge, they can differ slightly from any physical gauge nearby. History is cached in your browser and refreshed daily.
+</footer>
+
+</div>
+<script>
+"use strict";
+const LOCS=[
+ {id:"darien",name:"Darien, CT",lat:41.0787,lon:-73.4693,coords:"41.08°N 73.47°W · 33 FT · LI SOUND SHORE"},
+ {id:"parkcity",name:"Park City, UT",lat:40.6461,lon:-111.4980,coords:"40.65°N 111.50°W · 7,000 FT · WASATCH BACK"}
+];
+const HIST_START="1940-01-01";
+const NORM_Y0=1991,NORM_Y1=2020;
+const state={loc:LOCS[0],metric:"rain",data:{},calYear:0,calMonth:0,selDay:null,charts:{}};
+
+const $=id=>document.getElementById(id);
+const fmt=(v,d=2)=>v==null?"–":v.toFixed(d);
+const todayStr=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+
+/* ---------- data fetch ---------- */
+async function fetchJSON(url){const r=await fetch(url);if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}
+
+async function loadRecent(loc){
+  const u=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`+
+    `&daily=precipitation_sum,snowfall_sum&hourly=precipitation,snowfall`+
+    `&past_days=31&forecast_days=1&timezone=auto&precipitation_unit=inch`;
+  return fetchJSON(u);
+}
+async function loadHistory(loc){
+  const key="gaugelog_hist_"+loc.id;
+  const today=todayStr();
+  try{const c=JSON.parse(localStorage.getItem(key));
+      if(c&&c.savedOn===today&&c.daily)return c;}catch(e){}
+  const u=`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lon}`+
+    `&start_date=${HIST_START}&end_date=${today}`+
+    `&daily=precipitation_sum,snowfall_sum&timezone=auto&precipitation_unit=inch`;
+  const j=await fetchJSON(u);
+  const out={savedOn:today,daily:j.daily};
+  try{localStorage.setItem(key,JSON.stringify(out));}catch(e){/* storage full or unavailable — fine */}
+  return out;
+}
+
+/* Merge archive (long, lags ~5 days) with recent model days into one map date -> {r,s} */
+function buildSeries(hist,recent){
+  const map=new Map();
+  const hd=hist.daily;
+  for(let i=0;i<hd.time.length;i++){
+    const r=hd.precipitation_sum[i],s=hd.snowfall_sum[i];
+    if(r!=null||s!=null)map.set(hd.time[i],{r:r??0,s:s??0});
+  }
+  const rd=recent.daily;
+  for(let i=0;i<rd.time.length;i++){
+    const r=rd.precipitation_sum[i],s=rd.snowfall_sum[i];
+    if(r!=null||s!=null)map.set(rd.time[i],{r:r??0,s:s??0});
+  }
+  return map;
+}
+
+function computeAll(loc,hist,recent){
+  const series=buildSeries(hist,recent);
+  const now=new Date();
+  const tISO=todayStr();
+
+  /* last 24h from hourly */
+  let h24r=0,h24s=0;
+  const hh=recent.hourly;
+  if(hh&&hh.time){
+    const nowMs=Date.now();
+    for(let i=0;i<hh.time.length;i++){
+      const t=new Date(hh.time[i]).getTime();
+      if(t<=nowMs&&t>nowMs-24*3600*1000){h24r+=hh.precipitation[i]||0;h24s+=hh.snowfall[i]||0;}
+    }
+  }
+
+  const sumRange=(days)=>{let r=0,s=0;
+    for(let i=0;i<days;i++){const d=new Date(now);d.setDate(d.getDate()-i);
+      const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+      const v=series.get(k);if(v){r+=v.r;s+=v.s;}}
+    return{r,s};};
+  const d7=sumRange(7),d30=sumRange(30);
+
+  /* YTD */
+  let ytdR=0,ytdS=0;const yNow=now.getFullYear();
+  for(const[k,v]of series){if(k.startsWith(yNow+"")){ytdR+=v.r;ytdS+=v.s;}}
+
+  /* days since measurable (>=0.01" rain or >=0.1" snow) */
+  let since=null;
+  for(let i=0;i<400;i++){const d=new Date(now);d.setDate(d.getDate()-i);
+    const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    const v=series.get(k);if(v&&(v.r>=0.01||v.s>=0.1)){since=i;break;}}
+
+  /* monthly totals per year + normals */
+  const monthly={}; /* year -> [12] of {r,s} */
+  for(const[k,v]of series){
+    const y=+k.slice(0,4),m=+k.slice(5,7)-1;
+    (monthly[y]??=Array.from({length:12},()=>({r:0,s:0})));
+    monthly[y][m].r+=v.r;monthly[y][m].s+=v.s;
+  }
+  const normalM=Array.from({length:12},()=>({r:0,s:0}));
+  let nY=0;
+  for(let y=NORM_Y0;y<=NORM_Y1;y++){if(monthly[y]){nY++;for(let m=0;m<12;m++){normalM[m].r+=monthly[y][m].r;normalM[m].s+=monthly[y][m].s;}}}
+  if(nY>0)for(let m=0;m<12;m++){normalM[m].r/=nY;normalM[m].s/=nY;}
+
+  /* yearly totals (exclude current partial year from average) */
+  const years=Object.keys(monthly).map(Number).sort((a,b)=>a-b);
+  const yearly=years.map(y=>({y,r:monthly[y].reduce((a,b)=>a+b.r,0),s:monthly[y].reduce((a,b)=>a+b.s,0)}));
+  const full=yearly.filter(o=>o.y<yNow);
+  const avgR=full.length?full.reduce((a,b)=>a+b.r,0)/full.length:0;
+  const avgS=full.length?full.reduce((a,b)=>a+b.s,0)/full.length:0;
+
+  /* normals for gauge bars: 30-day normal ≈ avg annual/365*30 refined by current month mix; YTD normal via monthly proration */
+  const doy=Math.floor((now-new Date(yNow,0,0))/86400000);
+  const dim=[31,28.25,31,30,31,30,31,31,30,31,30,31];
+  let ytdNormR=0,ytdNormS=0,acc=0;
+  for(let m=0;m<12;m++){
+    const take=Math.max(0,Math.min(dim[m],doy-acc));
+    ytdNormR+=normalM[m].r*(take/dim[m]);ytdNormS+=normalM[m].s*(take/dim[m]);acc+=dim[m];
+  }
+  const m0=now.getMonth();
+  const n30R=(normalM[m0].r/dim[m0])*30,n30S=(normalM[m0].s/dim[m0])*30;
+
+  return{series,h24:{r:h24r,s:h24s},d7,d30,ytd:{r:ytdR,s:ytdS},since,
+         monthly,normalM,yearly,avgR,avgS,
+         norm30:{r:n30R,s:n30S},ytdNorm:{r:ytdNormR,s:ytdNormS},asOf:tISO};
+}
+
+/* ---------- rendering ---------- */
+const RAIN_SCALE=[[0.001,"#DCEAF5"],[0.1,"#B7D4EC"],[0.25,"#8ABBDF"],[0.5,"#5A9FD0"],[1,"#2E82BC"],[2,"#1560A0"],[99,"#0B4F7E"]];
+const SNOW_SCALE=[[0.05,"#E2ECF5"],[0.5,"#C4D9EC"],[1,"#A2C2E0"],[3,"#7FA6CC"],[6,"#5D89B4"],[12,"#456F9C"],[999,"#325780"]];
+function cellColor(v,metric){
+  if(!v)return null;
+  const amt=metric==="rain"?v.r:v.s;
+  const scale=metric==="rain"?RAIN_SCALE:SNOW_SCALE;
+  const min=metric==="rain"?0.005:0.05;
+  if(amt<min)return null;
+  for(const[t,c]of scale)if(amt<t||t>=99)return c;
+  return scale[scale.length-1][1];
+}
+
+function renderTabs(){
+  $("tabs").innerHTML="";
+  for(const l of LOCS){
+    const b=document.createElement("button");
+    b.className="tab"+(l.id===state.loc.id?" active":"");
+    b.innerHTML=`<div class="name">${l.name}</div><div class="coords">${l.coords}</div>`;
+    b.onclick=()=>{if(state.loc.id!==l.id){state.loc=l;state.selDay=null;boot();}};
+    $("tabs").appendChild(b);
+  }
+}
+
+function statCard(label,val,snow,gauge){
+  return `<div class="stat"><div class="label">${label}</div>
+    <div class="big">${fmt(val)}<small> in</small></div>
+    <div class="snowline">${snow!=null&&snow>=0.05?("❄ "+fmt(snow,1)+"″ snow"):""}</div>
+    ${gauge??""}</div>`;
+}
+function gaugeBar(actual,normal,label){
+  if(!normal||normal<=0)return"";
+  const pct=Math.min(100,actual/normal*100);
+  return `<div class="gauge${actual>normal?" over":""}"><i style="width:${pct}%"></i></div>
+    <div class="vs">${Math.round(actual/normal*100)}% of ${label} normal (${fmt(normal,1)}″)</div>`;
+}
+
+function renderStats(D){
+  $("stats").innerHTML=
+    statCard("Last 24 hrs",D.h24.r,D.h24.s)+
+    statCard("Last 7 days",D.d7.r,D.d7.s)+
+    statCard("Last 30 days",D.d30.r,D.d30.s,gaugeBar(D.d30.r,D.norm30.r,"30-day"))+
+    statCard("Year to date",D.ytd.r,D.ytd.s,gaugeBar(D.ytd.r,D.ytdNorm.r,"YTD"));
+  const dr=$("drought");
+  if(D.since!=null){dr.hidden=false;
+    dr.innerHTML=D.since===0?`Measurable precip <b>today</b>.`:`Last measurable precip: <b>${D.since} day${D.since===1?"":"s"} ago</b>.`;}
+  else dr.hidden=true;
+}
+
+function renderLegend(){
+  const scale=state.metric==="rain"?RAIN_SCALE:SNOW_SCALE;
+  $("legend").innerHTML=`<span>0</span><i style="background:var(--cell)"></i>`+
+    scale.map(s=>`<i style="background:${s[1]}"></i>`).join("")+
+    `<span>${state.metric==="rain"?"2″+":"12″+"}</span>`;
+}
+
+function renderCalendar(D){
+  const y=state.calYear,m=state.calMonth;
+  const first=new Date(y,m,1),start=first.getDay(),nd=new Date(y,m+1,0).getDate();
+  $("calTitle").textContent=first.toLocaleString("en-US",{month:"long"}).toUpperCase()+" "+y;
+  const now=new Date();
+  $("nextM").disabled=(y===now.getFullYear()&&m===now.getMonth());
+  $("prevM").disabled=(y===1940&&m===0);
+  const g=$("calgrid");g.innerHTML="";
+  for(let i=0;i<start;i++){const d=document.createElement("div");d.className="day empty";g.appendChild(d);}
+  const tISO=todayStr();
+  for(let dnum=1;dnum<=nd;dnum++){
+    const k=y+"-"+String(m+1).padStart(2,"0")+"-"+String(dnum).padStart(2,"0");
+    const v=D.series.get(k);
+    const el=document.createElement("div");
+    el.className="day";
+    const c=cellColor(v,state.metric);
+    if(c){el.style.background=c;el.classList.add("wet");}
+    if(k===tISO)el.classList.add("today");
+    if(k===state.selDay)el.classList.add("sel");
+    el.innerHTML=`<span class="n">${dnum}</span>`;
+    el.setAttribute("role","button");el.tabIndex=0;
+    const pick=()=>{state.selDay=k;renderCalendar(D);
+      const d=new Date(y,m,dnum).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"});
+      if(!v){$("logline").innerHTML=`${d} — no data.`;}
+      else{$("logline").innerHTML=`${d} — <b>${fmt(v.r)}″ rain</b>${v.s>=0.05?` · ❄ ${fmt(v.s,1)}″ snow`:""}${(v.r<0.005&&v.s<0.05)?" — dry":""}`;}};
+    el.onclick=pick;
+    el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}};
+    g.appendChild(el);
+  }
+  renderLegend();
+}
+
+function renderMonthly(D){
+  const years=Object.keys(D.monthly).map(Number).sort((a,b)=>b-a);
+  const sel=$("yearSel");
+  if(sel.options.length!==years.length){
+    sel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join("");
+  }
+  const y=+sel.value||years[0];sel.value=y;
+  const isRain=state.metric==="rain";
+  const vals=D.monthly[y].map(o=>+(isRain?o.r:o.s).toFixed(2));
+  const norm=D.normalM.map(o=>+(isRain?o.r:o.s).toFixed(2));
+  const labels=["J","F","M","A","M","J","J","A","S","O","N","D"];
+  if(state.charts.monthly)state.charts.monthly.destroy();
+  state.charts.monthly=new Chart($("monthlyChart"),{
+    data:{labels,datasets:[
+      {type:"bar",label:y+(isRain?" rain (in)":" snow (in)"),data:vals,
+       backgroundColor:isRain?"#2E82BC":"#7FA6CC",borderRadius:3},
+      {type:"line",label:"1991–2020 normal",data:norm,borderColor:"#D98E2B",
+       backgroundColor:"#D98E2B",borderWidth:2,pointRadius:2.5,tension:.3}
+    ]},
+    options:chartOpts()
+  });
+}
+
+function renderYearly(D){
+  const isRain=state.metric==="rain";
+  const labels=D.yearly.map(o=>o.y);
+  const vals=D.yearly.map(o=>+(isRain?o.r:o.s).toFixed(1));
+  const avg=isRain?D.avgR:D.avgS;
+  if(state.charts.yearly)state.charts.yearly.destroy();
+  state.charts.yearly=new Chart($("yearlyChart"),{
+    data:{labels,datasets:[
+      {type:"bar",label:isRain?"Annual precip (in)":"Annual snowfall (in)",data:vals,
+       backgroundColor:labels.map(y=>y===new Date().getFullYear()?"#D98E2B":(isRain?"#2E82BC":"#7FA6CC")),
+       borderRadius:2,categoryPercentage:1,barPercentage:.85},
+      {type:"line",label:"Average "+fmt(avg,1)+"″",data:labels.map(()=>+avg.toFixed(1)),
+       borderColor:"#16303F",borderDash:[5,4],borderWidth:1.2,pointRadius:0}
+    ]},
+    options:chartOpts(true)
+  });
+}
+function chartOpts(dense){
+  return{responsive:true,maintainAspectRatio:false,
+    interaction:{mode:"index",intersect:false},
+    plugins:{legend:{labels:{font:{family:"'IBM Plex Mono',monospace",size:10},boxWidth:12,color:"#5B7386"}}},
+    scales:{x:{grid:{display:false},ticks:{font:{family:"'IBM Plex Mono',monospace",size:9},color:"#5B7386",
+              maxRotation:0,autoSkip:true,maxTicksLimit:dense?12:12}},
+            y:{grid:{color:"#E4EBF0"},ticks:{font:{family:"'IBM Plex Mono',monospace",size:9},color:"#5B7386"},beginAtZero:true}}};
+}
+
+function renderAll(){
+  const D=state.data[state.loc.id];if(!D)return;
+  renderTabs();renderStats(D);renderCalendar(D);renderMonthly(D);renderYearly(D);
+  $("status").className="statusline";
+  $("status").textContent="Updated "+new Date().toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" · history through "+D.asOf;
+}
+
+/* ---------- wiring ---------- */
+$("mRain").onclick=()=>{state.metric="rain";$("mRain").classList.add("on");$("mSnow").classList.remove("on");renderAll();};
+$("mSnow").onclick=()=>{state.metric="snow";$("mSnow").classList.add("on");$("mRain").classList.remove("on");renderAll();};
+$("prevM").onclick=()=>{state.calMonth--;if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar(state.data[state.loc.id]);};
+$("nextM").onclick=()=>{state.calMonth++;if(state.calMonth>11){state.calMonth=0;state.calYear++;}renderCalendar(state.data[state.loc.id]);};
+$("yearSel").onchange=()=>renderMonthly(state.data[state.loc.id]);
+
+async function boot(){
+  const now=new Date();state.calYear=now.getFullYear();state.calMonth=now.getMonth();
+  renderTabs();
+  const loc=state.loc;
+  if(state.data[loc.id]){renderAll();return;}
+  const st=$("status");st.className="statusline";
+  try{
+    st.textContent="Loading recent observations for "+loc.name+"…";
+    const recent=await loadRecent(loc);
+    st.textContent="Loading 1940–present history for "+loc.name+" (first load takes a few seconds)…";
+    const hist=await loadHistory(loc);
+    state.data[loc.id]=computeAll(loc,hist,recent);
+    renderAll();
+  }catch(e){
+    st.className="statusline err";
+    st.textContent="Couldn't load data ("+e.message+"). Check your connection and reload — Open-Meteo may also be briefly rate-limiting.";
+  }
+}
+boot();
+</script>
+</body>
+</html>
