@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Rumson Dock & Dine</title>
+<style>
+:root{--ink:#0d2830;--muted:#66797d;--sea:#0b6f78;--sea2:#d9f0ef;--sand:#f5f0e6;--paper:#fffdf8;--warn:#a75a23;--bad:#9b3535;--good:#25704a;--line:#d9e1df}*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:linear-gradient(180deg,#e7f3f2 0,#f7f2e9 46%,#fffdf8 100%);min-height:100vh}.wrap{max-width:1180px;margin:auto;padding:28px 20px 60px}.hero{display:grid;grid-template-columns:1.55fr .95fr;gap:20px;align-items:stretch}.panel,.restaurant,.method{background:rgba(255,253,248,.94);border:1px solid rgba(13,40,48,.12);border-radius:22px;box-shadow:0 12px 35px rgba(18,55,60,.08)}.intro{padding:32px}.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:800;color:var(--sea)}h1{font-family:Georgia,serif;font-size:clamp(38px,6vw,68px);line-height:.95;margin:12px 0 16px}.lede{font-size:18px;line-height:1.55;max-width:780px;color:#344e53}.scope{display:inline-flex;gap:8px;align-items:center;margin-top:16px;background:var(--sea2);color:#14565c;border-radius:999px;padding:8px 12px;font-weight:700;font-size:13px}.tide{padding:26px;background:linear-gradient(150deg,#0d5961,#0a3942);color:white}.tide .eyebrow{color:#a9dcda}.big{font-size:48px;font-weight:800;letter-spacing:-.04em;margin:8px 0}.sub{opacity:.8;font-size:14px;line-height:1.5}.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.mini{padding:12px;border-radius:14px;background:rgba(255,255,255,.09)}.mini b{display:block;font-size:18px;margin-top:3px}.controls{margin:22px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.control{padding:17px 18px}.control label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:800;margin-bottom:7px}.control input{width:100%;border:0;background:#edf4f3;border-radius:11px;padding:12px 13px;font-size:18px;color:var(--ink);font-weight:700}.control strong{font-size:16px}.section-title{display:flex;align-items:end;justify-content:space-between;margin:34px 2px 14px}.section-title h2{font:700 32px Georgia,serif;margin:0}.section-title span{font-size:13px;color:var(--muted)}.restaurants{display:grid;grid-template-columns:1fr 1fr;gap:18px}.restaurant{overflow:hidden}.top{padding:23px 24px 15px;border-bottom:1px solid var(--line)}.name{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}.name h3{font:700 27px Georgia,serif;margin:0}.pill{white-space:nowrap;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.pill.warn{background:#fff0dc;color:#874c1b}.pill.bad{background:#f9e1e1;color:#873535}.pill.good{background:#def3e7;color:#266847}.address{color:var(--muted);font-size:13px;margin-top:5px}.body{padding:19px 24px 24px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{padding:12px;background:#f4f6f2;border-radius:13px}.stat span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:800;display:block}.stat b{font-size:18px;display:block;margin-top:4px}.depth{margin:16px 0;padding:16px;border-radius:15px;background:#e9f4f3}.depth .reading{font-size:25px;font-weight:900;color:#0d5961}.depth small{display:block;color:var(--muted);line-height:1.4;margin-top:5px}.ukc{margin-top:9px;font-weight:800;font-size:14px}.notes{font-size:14px;line-height:1.55;color:#40585d}.notes b{color:var(--ink)}.method{margin-top:20px;padding:22px 24px}.method h3{font:700 23px Georgia,serif;margin:0 0 10px}.method p,.method li{font-size:14px;line-height:1.55;color:#40585d}.method ul{margin:7px 0 0;padding-left:20px}.sources a{color:var(--sea);font-weight:700;text-decoration:none}.foot{margin-top:20px;font-size:12px;line-height:1.55;color:#687b7e}.error{display:none;background:#fff0dc;color:#784715;padding:8px 10px;border-radius:10px;margin-top:10px;font-size:12px}@media(max-width:800px){.hero,.restaurants{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.controls .control:last-child{grid-column:1/-1}.stats{grid-template-columns:1fr 1fr}.section-title{display:block}.section-title span{display:block;margin-top:6px}}@media(max-width:480px){.controls{grid-template-columns:1fr}.controls .control:last-child{grid-column:auto}.stats{grid-template-columns:1fr}.wrap{padding:16px 13px 40px}.intro,.tide{padding:23px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="hero">
+  <div class="panel intro">
+    <div class="eyebrow">Rumson, New Jersey · boater planning guide</div>
+    <h1>Dock & Dine</h1>
+    <div class="lede">A tide-aware guide to the waterfront restaurant sites in <b>Rumson proper</b>. Enter your boat draft and desired under-keel clearance; the page pulls NOAA tide data and estimates the water available at each dock.</div>
+    <div class="scope">Version 1 · Rumson municipal boundary only</div>
+  </div>
+  <div class="panel tide">
+    <div class="eyebrow">Estimated water level now</div>
+    <div class="big" id="tideNow">—</div>
+    <div class="sub" id="tideStatus">Loading NOAA Oceanic / Navesink River tide data…</div>
+    <div class="mini-grid">
+      <div class="mini">Local predicted tide<b id="localPred">—</b></div>
+      <div class="mini">Sandy Hook anomaly<b id="surge">—</b></div>
+      <div class="mini">Next high<b id="nextHigh">—</b></div>
+      <div class="mini">Next low<b id="nextLow">—</b></div>
+    </div>
+    <div class="error" id="apiError">Live NOAA fetch is unavailable in this browser right now. The site will retry automatically.</div>
+  </div>
+</section>
+
+<section class="controls">
+  <div class="panel control"><label for="draft">Your boat draft (ft)</label><input id="draft" type="number" min="0" max="15" step="0.1" value="3.5"></div>
+  <div class="panel control"><label for="margin">Safety margin / UKC (ft)</label><input id="margin" type="number" min="0" max="10" step="0.1" value="1.0"></div>
+  <div class="panel control"><label>Required depth</label><strong id="required">4.5 ft</strong><div style="font-size:12px;color:#66797d;margin-top:5px">Draft + your selected under-keel clearance</div></div>
+</section>
+
+<div class="section-title"><h2>Rumson waterfront restaurant sites</h2><span>Current research: 2 relevant sites, not ~13 active dock-and-dine restaurants</span></div>
+<section class="restaurants">
+  <article class="restaurant">
+    <div class="top">
+      <div class="name"><div><h3>Barnacle Bill’s</h3><div class="address">1 First Street, Rumson · Navesink River</div></div><span class="pill warn">Call first</span></div>
+    </div>
+    <div class="body">
+      <div class="stats">
+        <div class="stat"><span>Marina slips</span><b>90+</b></div>
+        <div class="stat"><span>Reported MLW depth</span><b>6.6–9.8 ft*</b></div>
+        <div class="stat"><span>Transient dining</span><b>Unconfirmed</b></div>
+      </div>
+      <div class="depth"><span>Estimated water depth now*</span><div class="reading" id="barnDepth">—</div><small>Reported 2–3 m marina depth at MLW plus the estimated current local water level. This is a range, not a sounding at a particular slip.</small><div class="ukc" id="barnUKC">Waiting for live tide…</div></div>
+      <div class="notes"><b>Docking:</b> official marina materials describe 90+ seasonal floating/fixed slips. A 2024 specialist dock-and-dine guide said the restaurant did not permit dock-and-dine at that time, so do not assume transient restaurant dockage today.<br><br><b>Boat note:</b> fixed docks have electric; water is available on both fixed and floating docks.</div>
+    </div>
+  </article>
+
+  <article class="restaurant">
+    <div class="top">
+      <div class="name"><div><h3>Roots Steakhouse</h3><div class="address">Former Salt Creek Grille waterfront site · 4 Bingham Avenue</div></div><span class="pill bad">Coming soon</span></div>
+    </div>
+    <div class="body">
+      <div class="stats">
+        <div class="stat"><span>Historic dock</span><b>4–6 boats</b></div>
+        <div class="stat"><span>Current baseline depth</span><b>Not verified</b></div>
+        <div class="stat"><span>Current status</span><b>Not open</b></div>
+      </div>
+      <div class="depth"><span>Local tide at site now</span><div class="reading" id="rootsTide">—</div><small>No current, reliable dock sounding has been published for the new Roots operation, so the site deliberately does not fabricate a water-depth number.</small><div class="ukc">Historic Salt Creek guidance warned deep-draft boats away at low tide.</div></div>
+      <div class="notes"><b>Docking history:</b> Salt Creek used a private T-dock, generally reported as first-come with no dockmaster. Older guides described capacity of roughly 4–6 boats.<br><br><b>Current reality:</b> Salt Creek closed December 31, 2025. Roots’ official site still labels Rumson “coming soon.” Dock policy for Roots has not yet been published.</div>
+    </div>
+  </article>
+</section>
+
+<section class="method">
+  <h3>How the live depth estimate works</h3>
+  <ul><li><b>Local astronomical tide:</b> NOAA station 8531753, Oceanic / Navesink River in Rumson.</li><li><b>Weather / surge adjustment:</b> observed minus predicted water level at NOAA Sandy Hook 8531680, added to the local Rumson prediction when available.</li><li><b>Dock depth estimate:</b> reported depth at mean lower low water (MLLW) + estimated current local water level.</li><li><b>Go / no-go check:</b> compares the conservative end of the depth range against your boat draft + selected safety margin.</li></ul>
+</section>
+
+<section class="method sources">
+  <h3>Source trail</h3>
+  <p><a href="https://tidesandcurrents.noaa.gov/stationhome.html?id=8531753" target="_blank">NOAA Oceanic / Navesink River</a> · <a href="https://tidesandcurrents.noaa.gov/stationhome.html?id=8531680" target="_blank">NOAA Sandy Hook</a> · <a href="https://barnaclebillsrumson.com/marina/" target="_blank">Barnacle Bill’s marina</a> · <a href="https://rootssteakhouse.com/rumson/" target="_blank">Roots Rumson</a></p>
+  <div class="foot"><b>Navigation warning:</b> This is a planning aid, not a substitute for NOAA charts, current marina soundings, Notices to Mariners, local knowledge, or your depth sounder. Reported marina depths can be stale and conditions can differ by berth and approach channel. Always verify dock availability and depth directly before arrival. *Barnacle Bill’s MLW range comes from a third-party marina directory and should be treated as provisional until the marina provides a current sounding.</div>
+</section>
+</div>
+<script>
+const OCEANIC='8531753', SANDY='8531680';
+let tideEstimate=null;
+const $=id=>document.getElementById(id);
+const f=x=>Number.isFinite(x)?x.toFixed(1):'—';
+function ymd(d){return d.toISOString().slice(0,10).replaceAll('-','')}
+function fmtTime(s){if(!s)return'—'; const d=new Date(s.replace(' ','T')+'-04:00'); return d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});}
+async function noaa(station,product,begin,end,interval='6'){
+ const p=new URLSearchParams({product,application:'rumson-dock-dine',begin_date:begin,end_date:end,datum:'MLLW',station,time_zone:'lst_ldt',units:'english',format:'json'}); if(product==='predictions')p.set('interval',interval); return fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?'+p).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()});
+}
+function interp(points,now){
+ const a=points.map(p=>({t:new Date(p.t.replace(' ','T')+'-04:00').getTime(),v:+p.v})).filter(p=>Number.isFinite(p.v)).sort((x,y)=>x.t-y.t); if(!a.length)return NaN; let before=a[0],after=a[a.length-1]; for(const p of a){if(p.t<=now)before=p;if(p.t>=now){after=p;break}} if(after.t===before.t)return before.v; return before.v+(after.v-before.v)*(now-before.t)/(after.t-before.t);
+}
+async function refresh(){
+ try{
+  const now=new Date(), start=new Date(now.getTime()-8*3600e3), end=new Date(now.getTime()+30*3600e3), b=ymd(start),e=ymd(end);
+  const [localHiLo,sandyPred,sandyObs]=await Promise.all([
+    noaa(OCEANIC,'predictions',b,e,'hilo'), noaa(SANDY,'predictions',b,e,'6'), noaa(SANDY,'water_level',b,e,'6')
+  ]);
+  const localPts=(localHiLo.predictions||[]), sp=(sandyPred.predictions||[]), so=(sandyObs.data||[]); const ms=now.getTime();
+  let local=interp(localPts,ms); const sandPredNow=interp(sp,ms); const recentObs=so.map(x=>({t:new Date(x.t.replace(' ','T')+'-04:00').getTime(),v:+x.v})).filter(x=>Number.isFinite(x.v)&&Math.abs(ms-x.t)<2*3600e3).sort((a,b)=>Math.abs(ms-a.t)-Math.abs(ms-b.t))[0];
+  const anomaly=(recentObs&&Number.isFinite(sandPredNow))?recentObs.v-sandPredNow:0; tideEstimate=local+anomaly;
+  $('tideNow').textContent=f(tideEstimate)+' ft MLLW'; $('localPred').textContent=f(local)+' ft'; $('surge').textContent=(anomaly>=0?'+':'')+f(anomaly)+' ft';
+  const future=localPts.filter(x=>new Date(x.t.replace(' ','T')+'-04:00').getTime()>ms); const hi=future.find(x=>x.type==='H'), lo=future.find(x=>x.type==='L'); $('nextHigh').textContent=hi?fmtTime(hi.t)+' · '+f(+hi.v)+' ft':'—'; $('nextLow').textContent=lo?fmtTime(lo.t)+' · '+f(+lo.v)+' ft':'—'; $('tideStatus').textContent='Updated '+now.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})+' · NOAA local tide'+(recentObs?' + Sandy Hook weather adjustment':''); $('apiError').style.display='none'; updateBoat();
+ }catch(err){console.error(err);$('apiError').style.display='block';$('tideStatus').textContent='Live data temporarily unavailable; retrying every 10 minutes.';}
+}
+function updateBoat(){const d=+$('draft').value||0,m=+$('margin').value||0,req=d+m;$('required').textContent=f(req)+' ft'; if(tideEstimate===null)return; const low=6.6+tideEstimate,high=9.8+tideEstimate;$('barnDepth').textContent=f(low)+'–'+f(high)+' ft'; $('rootsTide').textContent=f(tideEstimate)+' ft MLLW'; const ukc=low-d;$('barnUKC').textContent=ukc>=m?'Conservative estimate: clears your '+f(req)+' ft requirement by '+f(low-req)+' ft.':'Caution: conservative estimate is '+f(req-low)+' ft short of your selected requirement.'; $('barnUKC').style.color=ukc>=m?'#25704a':'#9b3535';}
+$('draft').addEventListener('input',updateBoat);$('margin').addEventListener('input',updateBoat);refresh();setInterval(refresh,600000);
+</script>
+</body>
+</html>
