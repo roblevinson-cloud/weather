@@ -7,24 +7,18 @@
 <title>Monmouth Dock & Dine — Boater's Guide</title>
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="preconnect" href="https://tile.openstreetmap.org">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynhJb+TFoAqjMZ0tR4kCk9gR6wY8=" crossorigin=""/>
-<style>
-:root{--navy:#092f3b;--ink:#113842;--sea:#0a7683;--aqua:#d9f0ee;--paper:#fffdf8;--sand:#f2ecdf;--muted:#62777b;--line:#d8e2df;--green:#23714e;--amber:#9a641e;--red:#9a3e38;--blue:#286b9a;--shadow:0 13px 38px rgba(9,47,59,.09)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(#e3f1f0 0,#f6f1e7 34%,#fffdf8 100%);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{max-width:1380px;margin:auto;padding:22px 18px 70px}.topbar{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:16px}.brand{display:flex;gap:10px;align-items:center;font-weight:900;letter-spacing:.04em}.brandmark{width:36px;height:36px;border-radius:50%;background:var(--navy);display:grid;place-items:center;color:white}.tag{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:800}.hero{display:grid;grid-template-columns:1.45fr .85fr;gap:16px}.panel,.card,.route,.watch{background:rgba(255,253,248,.95);border:1px solid rgba(9,47,59,.12);box-shadow:var(--shadow);border-radius:21px}.intro{padding:31px}.intro h1{font:700 clamp(38px,5vw,70px)/.98 Georgia,serif;margin:8px 0 14px;letter-spacing:-.035em}.lede{font-size:17px;line-height:1.55;color:#39545a;max-width:880px}.scope{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 11px;border-radius:999px;background:var(--aqua);font-size:12px;font-weight:850;color:#1c5960}.helm{padding:24px;background:linear-gradient(150deg,#0c5f69,#092f3b);color:white}.helm .tag{color:#9cd7d4}.helmrow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.helmstat{padding:12px;border-radius:14px;background:rgba(255,255,255,.09)}.helmstat span{font-size:10px;text-transform:uppercase;letter-spacing:.1em;opacity:.7;font-weight:800}.helmstat b{display:block;font-size:20px;margin-top:4px}.warning{margin-top:12px;padding:11px 12px;border-radius:12px;background:rgba(255,190,91,.12);font-size:12px;line-height:1.45;color:#f9dfb6}.controls{display:grid;grid-template-columns:1.15fr 1fr 1fr 1fr;gap:10px;margin:15px 0}.control{padding:14px 16px}.control label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:900;display:block;margin-bottom:7px}.control input,.control select{border:0;background:#edf4f2;width:100%;border-radius:11px;padding:11px 12px;color:var(--ink);font-size:16px;font-weight:750}.mapbox{overflow:hidden;margin:15px 0}.maphead{padding:16px 18px;display:flex;gap:14px;justify-content:space-between;align-items:center}.maphead h2{font:700 28px Georgia,serif;margin:0}.maplegend{display:flex;gap:7px;flex-wrap:wrap}.legend{font-size:11px;font-weight:850;padding:6px 8px;border-radius:999px;background:#edf4f2}.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}.dot.green{background:var(--green)}.dot.amber{background:var(--amber)}.dot.blue{background:var(--blue)}#map{height:570px;background:#dbe8e5}.mapfoot{padding:12px 16px;font-size:11px;color:var(--muted);line-height:1.45;border-top:1px solid var(--line)}.sectionhead{display:flex;justify-content:space-between;gap:12px;align-items:end;margin:31px 2px 12px}.sectionhead h2{font:700 31px Georgia,serif;margin:0}.sectionhead p{font-size:12px;color:var(--muted);margin:0}.routes{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.route{padding:17px}.route h3{font:700 20px Georgia,serif;margin:0 0 7px}.route .bigline{font-size:14px;font-weight:850;margin:8px 0}.route p{font-size:12px;line-height:1.5;color:#50676b;margin:7px 0}.route button,.linkbtn,.smallbtn{appearance:none;border:0;border-radius:9px;background:var(--navy);color:white;padding:8px 10px;font-weight:800;font-size:11px;cursor:pointer;text-decoration:none;display:inline-block}.route button:hover,.smallbtn:hover{filter:brightness(1.08)}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.card{overflow:hidden}.cardtop{padding:18px 18px 12px;border-bottom:1px solid var(--line)}.titleline{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}.card h3{font:700 23px Georgia,serif;margin:0}.town{font-size:11px;color:var(--muted);margin-top:4px}.pill{font-size:9px;text-transform:uppercase;letter-spacing:.07em;font-weight:900;padding:6px 8px;border-radius:999px;white-space:nowrap}.pill.direct{background:#dff2e7;color:#226846}.pill.marina{background:#deebf5;color:#285e83}.pill.call{background:#fff0d9;color:#81551d}.pill.watch{background:#f7dfdf;color:#813a36}.cardbody{padding:15px 18px 18px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.stat{background:#f2f5f1;border-radius:11px;padding:9px}.stat span{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:850}.stat b{display:block;font-size:15px;margin-top:3px}.water{padding:13px;margin:12px 0;border-radius:13px;background:#e7f3f2}.waterrow{display:flex;justify-content:space-between;gap:8px;align-items:flex-end}.waterlabel{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:#41666a}.waternum{font-size:23px;font-weight:900;color:#0b6470}.go{margin-top:7px;font-size:12px;font-weight:850}.go.ok{color:var(--green)}.go.caution{color:var(--amber)}.go.no{color:var(--red)}.go.unknown{color:var(--muted)}.notes{font-size:12px;line-height:1.5;color:#4b6266;min-height:70px}.notes b{color:var(--ink)}.cardactions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.smallbtn.secondary{background:#e5efed;color:#174951}.smallbtn.source{background:#eee8dc;color:#554a36}.filterempty{grid-column:1/-1;padding:35px;text-align:center;color:var(--muted)}.watchgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.watch{padding:18px}.watch h3{font:700 21px Georgia,serif;margin:0 0 7px}.watch p{font-size:12px;line-height:1.5;color:#52686c}.method{margin-top:18px;padding:20px}.method h3{font:700 23px Georgia,serif;margin:0 0 8px}.method p,.method li{font-size:12px;line-height:1.55;color:#4b6266}.method ul{padding-left:18px}.sourcegrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.sourcebox{background:#f3f5f1;border-radius:12px;padding:12px}.sourcebox b{display:block;margin-bottom:4px}.sourcebox a{color:var(--sea);font-weight:800;text-decoration:none}.footer{font-size:11px;color:var(--muted);line-height:1.55;margin-top:17px}.leaflet-popup-content{font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.4}.popup-name{font-weight:900;font-size:15px}.popup-meta{font-size:11px;color:#53676b;margin:3px 0}.popup-status{font-size:10px;font-weight:800}.marker{width:22px;height:22px;border:2px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.28)}.marker>i{display:block;width:7px;height:7px;background:white;border-radius:50%;margin:5.5px}.marker.green{background:var(--green)}.marker.amber{background:var(--amber)}.marker.blue{background:var(--blue)}.marker.red{background:var(--red)}
-@media(max-width:1050px){.grid{grid-template-columns:1fr 1fr}.routes{grid-template-columns:1fr 1fr}.controls{grid-template-columns:1fr 1fr}.hero{grid-template-columns:1fr}}
-@media(max-width:680px){.grid,.routes,.watchgrid,.sourcegrid{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}#map{height:480px}.maphead{display:block}.maplegend{margin-top:9px}.wrap{padding:12px 10px 50px}.intro{padding:23px}.helm{padding:20px}.sectionhead{display:block}.sectionhead p{margin-top:6px}.stats{grid-template-columns:1fr 1fr 1fr}}
-@media(max-width:430px){.controls{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.helmrow{grid-template-columns:1fr 1fr}}
-</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar"><div class="brand"><div class="brandmark">⚓</div><div>MONMOUTH DOCK & DINE</div></div><div class="tag">Live boater planning · v2</div></div>
+  <div class="topbar"><div class="brand"><div class="brandmark">⚓</div><div>MONMOUTH DOCK & DINE</div></div><div class="tag">Verified-access edition · v3</div></div>
   <section class="hero">
     <div class="panel intro">
       <div class="tag">Monmouth County, New Jersey · Raritan Bay to Manasquan</div>
       <h1>Eat by water.<br>Plan like a mariner.</h1>
-      <div class="lede">A county-wide dock-and-dine guide built around the way a boater actually approaches the Shore: <b>Raritan Bay, Sandy Hook Bay, Shrewsbury River, Navesink River, Shark River, Oceanport Creek and Manasquan River</b>. The chart-style map shows restaurant docks, marina-access restaurants and general approach corridors. Live NOAA tides feed the depth checks where a credible low-water dock depth is published.</div>
-      <div class="scope"><span class="chip">⚓ 20+ water-access destinations</span><span class="chip">🌊 NOAA tide-aware</span><span class="chip">🗺 OpenSeaMap seamarks</span><span class="chip">📏 Draft + UKC checks</span></div>
+      <div class="lede">A county-wide boating guide built around one hard rule: <b>a restaurant is not shown as a usable Dock & Dine destination unless current evidence supports an actual customer/transient docking path.</b> The default map contains verified restaurant docks and verified marina-access dining only. Historical listings, waterfront-only restaurants and unresolved claims are kept off the navigation map until re-verified.</div>
+      <div class="scope"><span class="chip">✅ 15 verified access paths</span><span class="chip">🌊 NOAA tide-aware</span><span class="chip">🗺 Verified pins only</span><span class="chip">📏 Draft + UKC checks</span></div><div class="auditnote"><b>Verification reset · September 12, 2026.</b> Inlet Cafe was removed from the verified map after a current-access discrepancy. A waterfront view, the word “dockside,” an old guide, or a photo of a pier no longer qualifies as proof that a visiting customer may tie up.</div>
     </div>
     <div class="panel helm">
       <div class="tag">Helm snapshot</div>
@@ -37,13 +31,13 @@
     <div class="panel control"><label for="search">Find restaurant / town / waterway</label><input id="search" placeholder="e.g., Belmar or Shrewsbury" /></div>
     <div class="panel control"><label for="draft">Boat draft (ft)</label><input id="draft" type="number" min="0" max="15" step="0.1" value="3.5" /></div>
     <div class="panel control"><label for="margin">Under-keel clearance (ft)</label><input id="margin" type="number" min="0" max="10" step="0.1" value="1.0" /></div>
-    <div class="panel control"><label for="statusFilter">Show</label><select id="statusFilter"><option value="all">All current destinations</option><option value="direct">Direct dock & dine</option><option value="marina">Marina access / walk-to</option><option value="depth">Published depth available</option><option value="call">Call-first / details incomplete</option></select></div>
+    <div class="panel control"><label for="statusFilter">Show</label><select id="statusFilter"><option value="verified" selected>Verified customer access only</option><option value="direct">Verified restaurant / D&D dock</option><option value="marina">Verified marina access / walk-to</option><option value="depth">Verified + published depth</option><option value="needs">Needs re-verification (do not rely)</option><option value="no">No verified dock / removed</option><option value="all">Full audit ledger</option></select></div>
   </section>
 
   <section class="panel mapbox">
-    <div class="maphead"><div><h2>Ocean-going destination map</h2><div class="tag">Raritan Bay → Sandy Hook → Two Rivers → Shark River → Manasquan</div></div><div class="maplegend"><span class="legend"><i class="dot green"></i>direct dock</span><span class="legend"><i class="dot blue"></i>marina access</span><span class="legend"><i class="dot amber"></i>call first</span></div></div>
+    <div class="maphead"><div><h2>Ocean-going destination map</h2><div class="tag">Raritan Bay → Sandy Hook → Two Rivers → Shark River → Manasquan</div></div><div class="maplegend"><span class="legend"><i class="dot green"></i>verified dock</span><span class="legend"><i class="dot blue"></i>verified marina access</span></div></div>
     <div id="map"></div>
-    <div class="mapfoot">Base map © OpenStreetMap contributors · seamark overlay © OpenSeaMap contributors. The dashed approach corridors simply orient you to the correct inlet/river system. They intentionally do not trace a navigational channel.</div>
+    <div class="mapfoot">Base map © OpenStreetMap contributors · seamark overlay © OpenSeaMap contributors. Only verified access destinations receive restaurant pins. The dashed approach corridors simply orient you to the correct inlet/river system; they are not courses to steer.</div>
   </section>
 
   <div class="sectionhead"><div><h2>Approach desk</h2><p>What matters before you point the bow inland.</p></div></div>
@@ -54,148 +48,29 @@
     <article class="route"><h3>Raritan Bay / Keyport</h3><div class="bigline">Matawan Creek destination · verify local creek depth</div><p>Keyport dock-and-dine sits well west of Sandy Hook. This is the outlier on the county map: verify creek channel, tide and the restaurant/marina’s current dock assignment before committing inland.</p><button onclick="zoomRoute('keyport')">Show cluster</button></article>
   </section>
 
-  <div class="sectionhead"><div><h2>Current destinations</h2><p id="countLabel">Loading destinations…</p></div></div>
+  <div class="sectionhead"><div><h2>Dock-access audit</h2><p id="countLabel">Loading verification ledger…</p></div></div>
   <section class="grid" id="cards"></section>
 
-  <div class="sectionhead"><div><h2>Rumson watchlist</h2><p>Not counted as dependable current dock-and-dine stops.</p></div></div>
+  <div class="sectionhead"><div><h2>Rumson exceptions</h2><p>Not shown as usable restaurant docks on the navigation map.</p></div></div>
   <section class="watchgrid">
-    <article class="watch"><h3>Barnacle Bill’s · Rumson</h3><p>Current 2026 statewide boating lists include it, while a detailed local guide previously said restaurant dock-and-dine was not permitted and the marina’s own materials emphasize seasonal slips. The site marks it <b>call first</b> rather than inventing certainty.</p><button class="smallbtn" onclick="focusCoords(40.37693,-74.01469,16)">Map location</button></article>
+    <article class="watch"><h3>Barnacle Bill’s · Rumson</h3><p>Barnacle Bill’s has a marina, but current customer dock-and-dine permission is not verified. A 2024 local boating feature explicitly said it did not allow dock-and-dine. It stays off the verified navigation map until the restaurant or marina publishes current guest-dock instructions.</p><button class="smallbtn" onclick="focusCoords(40.37693,-74.01469,16)">Map location</button></article>
     <article class="watch"><h3>Roots Steakhouse · former Salt Creek site</h3><p>Roots’ Rumson location is still officially listed as <b>coming soon</b>. Salt Creek historically had a small private T-dock and warned deeper-draft boats about low tide. It remains on the map as a future waterfront stop, not an open restaurant.</p><button class="smallbtn" onclick="focusCoords(40.37781,-74.01169,16)">Map location</button></article>
+  </section>
+
+  <section class="panel method">
+    <h3>Dock-access verification standard</h3>
+    <ul><li><b>Verified dock (green):</b> a current restaurant, marina or municipal source explicitly says dining guests may arrive by boat, use a dock-and-dine slip, or reserve a customer/transient berth tied to that restaurant.</li><li><b>Verified marina access (blue):</b> a current marina/municipal source offers transient slips and the restaurant is on-site or directly walkable. The card tells the boater to secure the marina berth separately.</li><li><b>Needs re-verification (amber):</b> only historical or third-party evidence exists, or the current venue says “dockside/waterfront/by boat” without defining a customer berth. These are <b>not shown as destination pins</b>.</li><li><b>No verified dock / removed (red):</b> current evidence does not establish customer dockage, or a credible boating source says dock-and-dine is not offered. These are <b>not navigation destinations</b>.</li><li>Every card includes the evidence link and audit date. No restaurant is promoted to verified solely from photos, map imagery, reviews, or an old dock-and-dine list.</li></ul>
   </section>
 
   <section class="panel method">
     <h3>How the live water check works</h3>
     <ul><li>Each destination is assigned to the nearest practical NOAA tide-prediction station: Sandy Hook/Highlands, Sea Bright, Oceanic/Navesink, Red Bank, Shark River or Manasquan.</li><li>Where a credible <b>MLLW/MLW dock or marina depth</b> is published, estimated water now = that baseline + current NOAA-predicted water level relative to MLLW.</li><li>The green/amber/red check compares that estimate with <b>your draft + your selected under-keel clearance</b>. It is not a hydrographic survey and does not model shoaling inside a slip.</li><li>If a dock depth has not been published or is too ambiguous, the site displays the local tide but deliberately refuses to manufacture a depth.</li></ul>
-    <div class="sourcegrid"><div class="sourcebox"><b>Official navigation</b><a href="https://nauticalcharts.noaa.gov/publications/coast-pilot/index.html" target="_blank" rel="noopener">NOAA Coast Pilot</a><br><a href="https://www.nauticalcharts.noaa.gov/enconline/enconline.html" target="_blank" rel="noopener">NOAA ENC Online</a></div><div class="sourcebox"><b>Live tide source</b><a href="https://tidesandcurrents.noaa.gov/" target="_blank" rel="noopener">NOAA Tides & Currents</a><br>Auto-refreshes every 10 minutes</div><div class="sourcebox"><b>Dock-and-dine cross-check</b><a href="https://goboatingnj.wordpress.com/2024/05/31/dock-dine/" target="_blank" rel="noopener">GoBoatingNJ · updated July 2026</a><br>Restaurant-specific official pages take priority</div></div>
+    <div class="sourcegrid"><div class="sourcebox"><b>Official navigation</b><a href="https://nauticalcharts.noaa.gov/publications/coast-pilot/index.html" target="_blank" rel="noopener">NOAA Coast Pilot</a><br><a href="https://www.nauticalcharts.noaa.gov/enconline/enconline.html" target="_blank" rel="noopener">NOAA ENC Online</a></div><div class="sourcebox"><b>Live tide source</b><a href="https://tidesandcurrents.noaa.gov/" target="_blank" rel="noopener">NOAA Tides & Currents</a><br>Auto-refreshes every 10 minutes</div><div class="sourcebox"><b>Dock-and-dine cross-check</b><a href="https://goboatingnj.wordpress.com/2024/05/31/dock-dine/" target="_blank" rel="noopener">GoBoatingNJ · updated July 2026</a><br>Current primary restaurant/marina/municipal sources take priority; secondary lists are discovery only</div></div>
   </section>
 
-  <div class="footer"><b>County boundary:</b> this edition stops at Monmouth County. Point Pleasant Beach and Brick are intentionally excluded even though they are immediately across the Manasquan River in Ocean County. Long Branch oceanfront restaurants without boat access are likewise excluded. Last research refresh: September 12, 2026.</div>
+  <div class="footer"><b>County boundary:</b> this edition stops at Monmouth County. Point Pleasant Beach and Brick are intentionally excluded even though they are immediately across the Manasquan River in Ocean County. Long Branch oceanfront restaurants without boat access are likewise excluded. Dock-access audit refreshed September 12, 2026. Default map pins are restricted to verified current access paths.</div>
 </div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script>
-const STATIONS={
-  sandy:{id:'8531712',name:'Highlands / Route 36'},
-  seaBright:{id:'8531804',name:'Sea Bright'},
-  oceanic:{id:'8531753',name:'Oceanic / Navesink'},
-  redBank:{id:'8531833',name:'Red Bank'},
-  shark:{id:'8532322',name:'Shark River Hills'},
-  belmar:{id:'8532337',name:'Belmar / Atlantic Ocean'},
-  manasquan:{id:'8532591',name:'Manasquan Inlet'},
-  keyport:{id:'8531680',name:'Sandy Hook (regional proxy)'}
-};
-
-const PLACES=[
- {id:'rock',name:'The Rock / Blue Rock Cafe',town:'Keyport',water:'Matawan Creek / Raritan Bay',lat:40.4367,lon:-74.2150,kind:'direct',status:'Direct dock',slips:'6 reported',depth:null,station:'keyport',phone:'732-583-7699',vhf:'Marina call',note:'Across from Wagner’s Twin Towers Marina; long-running dock-and-dine listing. Creek depth is tide-sensitive — verify local channel and dock assignment.',url:'https://www.facebook.com/therock304/'},
- {id:'ondeck',name:'On the Deck',town:'Atlantic Highlands',water:'Atlantic Highlands Harbor',lat:40.41770,lon:-74.03612,kind:'marina',status:'Marina access',slips:'Municipal harbor',depth:null,station:'sandy',phone:'732-872-1424',vhf:'Harbor call',note:'Waterfront restaurant at the municipal harbor. Treat this as marina-access dining: secure a transient berth with Atlantic Highlands Harbor, then walk to the restaurant.',url:'https://onthedeckrestaurant.com/'},
- {id:'onewillow',name:'One Willow',town:'Highlands',water:'Sandy Hook Bay',lat:40.4094,lon:-74.0006,kind:'direct',status:'Dock & dine',slips:'≥15 transient marina',depth:6.0,station:'sandy',phone:'732-730-7770',vhf:'7',note:'Reserve restaurant and Sandy Hook Bay Marina slip separately. Marina publishes ~6 ft MLW and transient availability; summer weekends book early.',url:'https://www.onewillowhighlands.com/'},
- {id:'bahrs',name:'Bahr’s Landing',town:'Highlands',water:'Shrewsbury River mouth',lat:40.39733,lon:-73.98082,kind:'direct',status:'Dock & dine',slips:'45 marina reported',depth:null,station:'sandy',phone:'732-872-1245 x3',vhf:'Call dockmaster',note:'Restaurant + working marina with fuel and dock-and-dine. Third-party marina listing reports a deep approach; dockside depth is not published clearly enough here to turn into a live draft number.',url:'https://bahrslanding.com/dock-dine/'},
- {id:'mobys',name:'Moby’s Lobster Deck',town:'Highlands',water:'Shrewsbury River mouth',lat:40.3971,lon:-73.9802,kind:'direct',status:'Dock & dine',slips:'Shared marina',depth:null,station:'sandy',phone:'732-872-1245 x4',vhf:'9 / 68 reported',note:'Seasonal casual deck next to Bahr’s. Current statewide boating list and waterfront guide both identify it as transient dock-and-dine.',url:'https://www.mobyslobsterdeck.com/'},
- {id:'proving',name:'Proving Ground',town:'Highlands',water:'Sandy Hook Bay',lat:40.40257,lon:-73.98353,kind:'direct',status:'Dock & dine',slips:'Call dockmaster',depth:null,station:'sandy',phone:'732-872-2266',vhf:'Call dockmaster',note:'If the dock is full, local guide says you may be able to anchor across the channel and coordinate pickup with the dockmaster. Confirm before relying on that option.',url:'https://www.theprovingground.com/'},
- {id:'inlet',name:'Inlet Cafe',town:'Highlands',water:'Sandy Hook Bay',lat:40.40295,lon:-73.98386,kind:'direct',status:'Dock & dine',slips:'Transient welcome reported',depth:null,station:'sandy',phone:'732-872-9764',vhf:'9 / 68 reported',note:'Reopened in 2026. Official site asks boat visitors to call; boating resources report transient docking. Call ahead for current slip procedure.',url:'https://inletcafe.com/'},
- {id:'seafarer',name:'The Seafarer',town:'Highlands',water:'Sandy Hook Bay',lat:40.40537,lon:-73.98858,kind:'direct',status:'Small-boat dock',slips:'1 designated + T docks',depth:null,station:'sandy',phone:'732-861-1741',vhf:'Call venue',note:'Venue guidance describes one designated dock-and-dine slip for boats under 22 ft plus tie-up options on two T-docks at Baker’s Marina. Confirm day-of.',url:'https://www.theseafarernj.com/'},
- {id:'beachwalk',name:'TheBAR at BeachWalk / Taco Shell',town:'Sea Bright',water:'Shrewsbury River',lat:40.3877,lon:-73.9740,kind:'direct',status:'Seasonal dock',slips:'Private dock',depth:null,station:'seaBright',phone:'732-842-8450',vhf:'Call venue',note:'Seasonal private dock; official site explicitly welcomes guests arriving by boat for dock-and-dine. Swift tide and passing-boat wakes are worth planning around.',url:'https://www.beachwalkseabright.com/'},
- {id:'cove',name:'The Cove',town:'Sea Bright',water:'Shrewsbury River',lat:40.35737,lon:-73.97470,kind:'call',status:'Call marina',slips:'10 transient / 60 reported',depth:null,station:'seaBright',phone:'See marina site',vhf:'68 / 9 reported',note:'New waterfront property is designed for boaters to dock and dine. Current marina guides report 10 transient slips / 60 total and an 8 ft controlling depth; verify current sounding and assignment directly before arrival.',url:'https://thecoveseabright.com/'},
- {id:'eventide',name:'EvenTide Grille',town:'Sea Bright',water:'Shrewsbury River',lat:40.35116,lon:-73.97637,kind:'direct',status:'Dock & dine',slips:'4 D&D reported / 125 marina',depth:5.0,station:'seaBright',phone:'732-530-1414',vhf:'72 reported',note:'Uses Navesink Marina. Third-party marina data reports ~5 ft approach/dockside depth and current local listings report a handful of dining slips; verify with marina.',url:'https://eventidegrille.com/'},
- {id:'beachtavern',name:'Beach Tavern',town:'Monmouth Beach',water:'Shrewsbury River',lat:40.33667,lon:-73.98117,kind:'direct',status:'Dock & dine',slips:'5 transient official',depth:null,station:'seaBright',phone:'732-870-8999',vhf:'9',note:'At Channel Club Marina. Official restaurant asks boaters to call the dockmaster ~30 minutes before arrival; marina lists 5 transient slips up to 100 ft.',url:'https://beachtavernnj.com/'},
- {id:'molo',name:'Osteria Molo',town:'Monmouth Beach',water:'Shrewsbury River',lat:40.33655,lon:-73.9813,kind:'marina',status:'Marina access',slips:'Channel Club transient',depth:null,station:'seaBright',phone:'Marina 732-222-7717',vhf:'9',note:'One of two on-site restaurants at Channel Club Marina. Secure transient/dock-and-dine space with the marina, then walk to the restaurant.',url:'https://osteriamolonj.com/'},
- {id:'oceanport',name:'The Wharf at Oceanport',town:'Oceanport',water:'Oceanport Creek',lat:40.316326,lon:-74.032271,kind:'direct',status:'Dock & dine',slips:'71-slip marina',depth:null,station:'seaBright',phone:'848-456-4410',vhf:'Call venue',note:'Waterfront restaurant at the former Fort Monmouth marina. Public redevelopment materials describe a 71-slip marina designed to accommodate dock-and-dine service.',url:'https://www.instagram.com/thewharfatoceanport/'},
- {id:'molly',name:'Molly Pitcher Inn',town:'Red Bank',water:'Navesink River',lat:40.35333,lon:-74.07233,kind:'direct',status:'Reserve dock',slips:'72 official / 12 transient reported',depth:6.0,station:'redBank',phone:'732-747-2500 x535',vhf:'9',note:'Dock-and-dine reservations required. Official marina lists vessels roughly 30–65 ft; Waterway Guide reports ~6 ft approach/dockside depth.',url:'https://www.themollypitcher.com/marina'},
- {id:'oyster',name:'Pearl at The Oyster Point Hotel',town:'Red Bank',water:'Navesink River',lat:40.35537,lon:-74.07427,kind:'direct',status:'Reserve dock',slips:'34 total dock/overnight',depth:null,station:'redBank',phone:'732-530-8200',vhf:'9',note:'Hotel marina advertises 34 slips for overnight or dock-and-dine, accommodating boats up to about 60 ft. Reservations required.',url:'https://www.theoysterpointhotel.com/'},
- {id:'boondocks',name:'The BoonDocks Fishery',town:'Red Bank',water:'Navesink River',lat:40.3524,lon:-74.0692,kind:'marina',status:'Municipal marina access',slips:'Marine Park marina',depth:null,station:'redBank',phone:'732-747-7177',vhf:'Confirm marina',note:'Seasonal seafood spot inside Marine Park next to Red Bank’s municipal marina. Treat as marina-access dining rather than a guaranteed restaurant slip; confirm transient space.',url:'https://theboondocksfishery.com/'},
- {id:'sunsets',name:'Sunsets Riverfront',town:'Neptune City',water:'Shark River',lat:40.188005,lon:-74.026021,kind:'direct',status:'Dock & dine listed',slips:'Call first',depth:null,station:'shark',phone:'732-775-9911',vhf:'Call venue',note:'Current statewide dock-and-dine list includes Sunsets. The venue is active in 2026; dock count and current sounding were not published clearly enough for a numeric depth check.',url:'https://sunsetsriverfront.com/'},
- {id:'kleins',name:'Klein’s Fish Market & Waterside Café',town:'Belmar',water:'Shark River',lat:40.18445,lon:-74.02474,kind:'direct',status:'Dock access',slips:'Call first',depth:null,station:'shark',phone:'732-681-1177',vhf:'Call venue',note:'Long-running Shark River dock-and-dine stop. Use the Shark River approach/bridge notes and call for current dock assignment and depth.',url:'https://www.kleinsfish.com/'},
- {id:'marinagrille',name:'Marina Grille',town:'Belmar',water:'Shark River',lat:40.1809,lon:-74.0310,kind:'direct',status:'Dock & dine',slips:'70 transient marina reported',depth:7.0,station:'shark',phone:'732-894-3211',vhf:'Belmar Marina',note:'At Belmar Marina, less than a mile inside Shark River Inlet. Marina publishes about 7 ft mean low water; public marina directory reports 70 transient slips.',url:'https://marinagrillenj.com/'},
- {id:'pier9',name:'9th Ave Pier',town:'Belmar',water:'Shark River',lat:40.1808,lon:-74.0307,kind:'direct',status:'Dock & dine',slips:'Belmar Marina',depth:7.0,station:'shark',phone:'732-749-3800',vhf:'Belmar Marina',note:'Official FAQ explicitly confirms dock space at Belmar Marina for restaurant guests. Same marina water-depth baseline as Marina Grille.',url:'https://www.9thavepier.com/'},
- {id:'waypoint',name:'Waypoint 622',town:'Brielle',water:'Manasquan River',lat:40.10742,lon:-74.05186,kind:'direct',status:'1 D&D slip',slips:'1 first-come slip',depth:null,station:'manasquan',phone:'732-528-6665',vhf:'Call upon arrival',note:'Official guidance says one dock-and-dine slip, first come/first served, and to call once you arrive. Manasquan Inlet conditions matter more than restaurant capacity here.',url:'https://www.waypoint622.com/'},
- {id:'pigparrot',name:'Pig & Parrot Sandbar',town:'Brielle',water:'Manasquan River',lat:40.10715,lon:-74.05262,kind:'direct',status:'Dock & dine',slips:'Adjacent marina',depth:null,station:'manasquan',phone:'732-528-7750',vhf:'Call venue',note:'At/adjacent to Brielle Yacht Club marina and actively marketed as a boat-access stop. Confirm the specific transient berth and channel depth before arrival.',url:'https://www.thepigandparrot.com/'}
-];
-
-const WATCH=[
- {name:'Barnacle Bill’s',lat:40.37693,lon:-74.01469,color:'amber',text:'Conflicting dock-and-dine guidance — call first'},
- {name:'Roots Steakhouse (coming soon)',lat:40.37781,lon:-74.01169,color:'red',text:'Future former-Salt-Creek site; not open yet'}
-];
-
-const tideCache={};
-let markers={};
-let map;
-const $=id=>document.getElementById(id);
-function fmt(x,n=1){return Number.isFinite(x)?x.toFixed(n):'—'}
-function ymd(d){return d.toISOString().slice(0,10).replaceAll('-','')}
-function easternMs(s){
-  const m=s.match(/(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d)/); if(!m)return NaN;
-  const utcGuess=Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5]);
-  const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(utcGuess));
-  const get=t=>+parts.find(p=>p.type===t).value;
-  const represented=Date.UTC(get('year'),get('month')-1,get('day'),get('hour'),get('minute'));
-  return utcGuess-(represented-utcGuess);
-}
-function interp(points,ms){
-  const a=points.map(p=>({t:easternMs(p.t),v:+p.v})).filter(p=>Number.isFinite(p.t)&&Number.isFinite(p.v)).sort((a,b)=>a.t-b.t);
-  if(!a.length)return NaN; let before=a[0],after=a[a.length-1];
-  for(const p of a){if(p.t<=ms)before=p;if(p.t>=ms){after=p;break}}
-  if(after.t===before.t)return before.v; return before.v+(after.v-before.v)*(ms-before.t)/(after.t-before.t);
-}
-function nextExtremes(points,ms){let hi=null,lo=null;for(const p of points){const t=easternMs(p.t);if(t>ms){if(p.type==='H'&&!hi)hi=p;if(p.type==='L'&&!lo)lo=p;if(hi&&lo)break}}return{hi,lo}}
-function timeLabel(p){if(!p)return'—';const ms=easternMs(p.t);return new Date(ms).toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'})+' · '+(+p.v).toFixed(1)+' ft'}
-async function noaa(station,interval='6'){
-  const now=new Date(),start=new Date(now.getTime()-12*3600e3),end=new Date(now.getTime()+36*3600e3);
-  const params=new URLSearchParams({product:'predictions',application:'monmouth-dock-dine',begin_date:ymd(start),end_date:ymd(end),datum:'MLLW',station,time_zone:'lst_ldt',units:'english',format:'json',interval});
-  const r=await fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?'+params);if(!r.ok)throw new Error('NOAA '+r.status);return r.json();
-}
-async function loadTides(){
-  let ok=0; const entries=Object.entries(STATIONS);
-  await Promise.all(entries.map(async([key,s])=>{try{const[p,h]=await Promise.all([noaa(s.id,'6'),noaa(s.id,'hilo')]);tideCache[key]={now:interp(p.predictions||[],Date.now()),ext:nextExtremes(h.predictions||[],Date.now()),name:s.name};ok++;}catch(e){tideCache[key]={now:NaN,ext:{},name:s.name,error:true}}}));
-  $('feedCount').textContent=ok+'/'+entries.length+' live'; $('updated').textContent=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}); renderCards();
-}
-function requirement(){return (+$('draft').value||0)+(+$('margin').value||0)}
-function waterStatus(place){
-  const t=tideCache[place.station]; if(!t||!Number.isFinite(t.now))return{cls:'unknown',text:'NOAA tide loading / unavailable',est:NaN,tide:NaN};
-  if(!Number.isFinite(place.depth))return{cls:'unknown',text:'Dock depth not published — call before relying on tide alone',est:NaN,tide:t.now};
-  const est=place.depth+t.now,delta=est-requirement();
-  if(delta>=0.75)return{cls:'ok',text:`PASS estimate · ${delta.toFixed(1)} ft above selected requirement`,est,tide:t.now};
-  if(delta>=0)return{cls:'caution',text:`TIGHT estimate · only ${delta.toFixed(1)} ft above selected requirement`,est,tide:t.now};
-  return{cls:'no',text:`DO NOT RELY ON THIS WINDOW · ${Math.abs(delta).toFixed(1)} ft below selected requirement`,est,tide:t.now};
-}
-function kindLabel(p){if(p.kind==='direct')return['direct','Direct dock'];if(p.kind==='marina')return['marina','Marina access'];return['call','Call first']}
-function filterPlaces(){
-  const q=$('search').value.trim().toLowerCase(),f=$('statusFilter').value;
-  return PLACES.filter(p=>{
-    const text=(p.name+' '+p.town+' '+p.water+' '+p.note).toLowerCase();
-    if(q&&!text.includes(q))return false;
-    if(f==='direct'&&p.kind!=='direct')return false;if(f==='marina'&&p.kind!=='marina')return false;if(f==='call'&&p.kind!=='call')return false;if(f==='depth'&&!Number.isFinite(p.depth))return false;return true;
-  });
-}
-function renderCards(){
-  const list=filterPlaces(); $('countLabel').textContent=`${list.length} of ${PLACES.length} current destinations shown`;
-  const req=requirement(); $('helmDraft').textContent=fmt(+$('draft').value)+' ft'; $('helmRequired').textContent=fmt(req)+' ft';
-  if(!list.length){$('cards').innerHTML='<div class="panel filterempty">No destinations match this filter.</div>';return}
-  $('cards').innerHTML=list.map(p=>{
-    const w=waterStatus(p),t=tideCache[p.station],kl=kindLabel(p); const tide=Number.isFinite(w.tide)?fmt(w.tide)+' ft MLLW':'—'; const depth=Number.isFinite(w.est)?fmt(w.est)+' ft':'Not calculated';
-    const next=t?`High ${timeLabel(t.ext.hi)} · Low ${timeLabel(t.ext.lo)}`:'NOAA pending';
-    return `<article class="card"><div class="cardtop"><div class="titleline"><div><h3>${p.name}</h3><div class="town">${p.town} · ${p.water}</div></div><span class="pill ${kl[0]}">${kl[1]}</span></div></div><div class="cardbody"><div class="stats"><div class="stat"><span>Dock/slips</span><b>${p.slips}</b></div><div class="stat"><span>Reported MLW</span><b>${Number.isFinite(p.depth)?fmt(p.depth)+' ft':'—'}</b></div><div class="stat"><span>VHF/contact</span><b>${p.vhf}</b></div></div><div class="water"><div class="waterrow"><div><div class="waterlabel">Local predicted tide now</div><div class="waternum">${tide}</div></div><div style="text-align:right"><div class="waterlabel">Est. dock depth now</div><div class="waternum">${depth}</div></div></div><div class="go ${w.cls}">${w.text}</div><div style="font-size:10px;color:#668084;margin-top:5px">${next}</div></div><div class="notes"><b>Boater note:</b> ${p.note}<br><b>Phone:</b> ${p.phone}</div><div class="cardactions"><button class="smallbtn" onclick="focusPlace('${p.id}')">Map dock</button><a class="smallbtn secondary" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lon}" target="_blank" rel="noopener">Directions</a><a class="smallbtn source" href="${p.url}" target="_blank" rel="noopener">Source / venue</a></div></div></article>`
-  }).join('');
-}
-function markerIcon(kind){const c=kind==='direct'?'green':kind==='marina'?'blue':kind==='call'?'amber':'red';return L.divIcon({className:'',html:`<div class="marker ${c}"><i></i></div>`,iconSize:[22,22],iconAnchor:[11,22],popupAnchor:[0,-22]})}
-function initMap(){
-  map=L.map('map',{zoomControl:true}).setView([40.30,-74.00],10);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
-  L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',{maxZoom:18,opacity:.85,attribution:'© OpenSeaMap contributors'}).addTo(map);
-  for(const p of PLACES){const m=L.marker([p.lat,p.lon],{icon:markerIcon(p.kind)}).addTo(map);m.bindPopup(`<div class="popup-name">${p.name}</div><div class="popup-meta">${p.town} · ${p.water}</div><div class="popup-status">${p.status} · ${p.slips}</div><div class="popup-meta">${p.note}</div>`);markers[p.id]=m;}
-  for(const w of WATCH){L.marker([w.lat,w.lon],{icon:markerIcon(w.color==='red'?'watch':'call')}).addTo(map).bindPopup(`<div class="popup-name">${w.name}</div><div class="popup-meta">${w.text}</div>`)}
-  const corridors=[
-    [[40.410,-73.940],[40.400,-73.975],[40.397,-73.982]],
-    [[40.188,-73.995],[40.185,-74.007],[40.181,-74.031]],
-    [[40.101,-74.018],[40.102,-74.035],[40.107,-74.052]],
-    [[40.455,-74.165],[40.452,-74.200],[40.4367,-74.2150]]
-  ];
-  corridors.forEach(c=>L.polyline(c,{color:'#0a7683',weight:2,dashArray:'8 8',opacity:.55}).addTo(map));
-  L.control.scale({imperial:true,metric:false}).addTo(map);
-}
-function focusPlace(id){const p=PLACES.find(x=>x.id===id);if(!p)return;map.setView([p.lat,p.lon],15);markers[id].openPopup();window.scrollTo({top:$('map').getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'})}
-function focusCoords(lat,lon,z=15){map.setView([lat,lon],z);window.scrollTo({top:$('map').getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'})}
-function zoomRoute(r){const bounds={sandy:[[40.32,-74.10],[40.44,-73.94]],shark:[[40.16,-74.06],[40.21,-73.99]],manasquan:[[40.085,-74.08],[40.12,-74.00]],keyport:[[40.43,-74.26],[40.47,-74.18]]};map.fitBounds(bounds[r]);window.scrollTo({top:$('map').getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'})}
-['search','statusFilter','draft','margin'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',renderCards));
-initMap();renderCards();loadTides();setInterval(loadTides,600000);
-</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
