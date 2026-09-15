@@ -67,10 +67,11 @@
     <ul><li>Each destination is assigned to the nearest practical NOAA tide-prediction station: Sandy Hook/Highlands, Sea Bright, Oceanic/Navesink, Red Bank, Shark River or Manasquan.</li><li>Where a credible <b>MLLW/MLW dock or marina depth</b> is published, estimated water now = that baseline + current NOAA-predicted water level relative to MLLW.</li><li>The green/amber/red check compares that estimate with <b>your draft + your selected under-keel clearance</b>. It is not a hydrographic survey and does not model shoaling inside a slip.</li><li>If a dock depth has not been published or is too ambiguous, the site displays the local tide but deliberately refuses to manufacture a depth.</li></ul>
     <div class="sourcegrid"><div class="sourcebox"><b>Official navigation</b><a href="https://nauticalcharts.noaa.gov/publications/coast-pilot/index.html" target="_blank" rel="noopener">NOAA Coast Pilot</a><br><a href="https://www.nauticalcharts.noaa.gov/enconline/enconline.html" target="_blank" rel="noopener">NOAA ENC Online</a></div><div class="sourcebox"><b>Live tide source</b><a href="https://tidesandcurrents.noaa.gov/" target="_blank" rel="noopener">NOAA Tides & Currents</a><br>Auto-refreshes every 10 minutes</div><div class="sourcebox"><b>Dock-and-dine cross-check</b><a href="https://goboatingnj.wordpress.com/2024/05/31/dock-dine/" target="_blank" rel="noopener">GoBoatingNJ · updated July 2026</a><br>Current primary restaurant/marina/municipal sources take priority; secondary lists are discovery only</div></div>
   </section>
-
   <div class="footer"><b>County boundary:</b> this edition stops at Monmouth County. Point Pleasant Beach and Brick are intentionally excluded even though they are immediately across the Manasquan River in Ocean County. Long Branch oceanfront restaurants without boat access are likewise excluded. Dock-access audit refreshed September 12, 2026. Default map pins are restricted to verified current access paths.</div>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="noaa-compat.js"></script>
 <script src="app.js"></script>
+<script src="tide-planner.js"></script>
 </body>
 </html>
