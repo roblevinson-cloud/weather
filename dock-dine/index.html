@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#082f3a" />
+<title>Dock & Dine — Fairfield County + Monmouth County</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="preconnect" href="https://tile.openstreetmap.org">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand"><div class="brandmark">⚓</div><div><b>DOCK & DINE</b><span>Boater-first dining guide</span></div></div>
+    <div class="regions" role="group" aria-label="Region filter">
+      <button class="regionbtn active" data-region="all">All waters</button>
+      <button class="regionbtn" data-region="fairfield">Fairfield County</button>
+      <button class="regionbtn" data-region="monmouth">Monmouth County</button>
+    </div>
+  </header>
+
+  <section class="hero panel">
+    <div>
+      <div class="eyebrow">Long Island Sound · New York Harbor · Jersey Shore</div>
+      <h1>One helm for both shores.</h1>
+      <p>Browse verified boat-access dining in Fairfield County, Connecticut and Monmouth County, New Jersey without switching websites. Your arrival time, draft and under-keel-clearance assumptions stay fixed while you move between regions.</p>
+      <div class="chips"><span>✓ verified access paths only</span><span>≈ NOAA tide-aware</span><span>↕ draft + UKC planner</span><span>◉ one shared map</span></div>
+    </div>
+    <div class="snapshot">
+      <div><span>Visible destinations</span><b id="visibleCount">—</b></div>
+      <div><span>NOAA feeds</span><b id="feedCount">—</b></div>
+      <div><span>Selected arrival</span><b id="arrivalLabel">—</b></div>
+      <div><span>Required depth</span><b id="requiredLabel">—</b></div>
+    </div>
+  </section>
+
+  <section class="controls">
+    <div class="panel control wide"><label for="search">Find restaurant, town or waterway</label><input id="search" placeholder="e.g. Norwalk, Red Bank, Shrewsbury" /></div>
+    <div class="panel control"><label for="arrival">Arrival date & time</label><input id="arrival" type="datetime-local" step="1800" /></div>
+    <div class="panel control"><label for="draft">Boat draft (ft)</label><input id="draft" type="number" min="0" max="20" step="0.1" value="3.5" /></div>
+    <div class="panel control"><label for="ukc">Desired UKC (ft)</label><input id="ukc" type="number" min="0" max="10" step="0.1" value="1.0" /></div>
+  </section>
+
+  <section class="panel mapbox">
+    <div class="maphead"><div><h2 id="mapTitle">All waters</h2><p id="mapSubtitle">Fairfield County + Monmouth County</p></div><div class="legend"><span><i class="dot fairfield"></i>Fairfield</span><span><i class="dot monmouth"></i>Monmouth</span></div></div>
+    <div id="map"></div>
+    <div class="mapfoot">Base map © OpenStreetMap contributors · seamarks © OpenSeaMap contributors. Destination pins indicate verified customer/transient access paths; they are not waypoints or courses to steer.</div>
+  </section>
+
+  <section id="passage" class="panel passage">
+    <div class="passageicon">↔</div>
+    <div><div class="eyebrow">Between the two regions</div><h2>Fairfield ↔ Monmouth is a passage, not a restaurant hop.</h2><p>The practical water route normally runs from western Long Island Sound through the East River / New York Harbor system and then toward Sandy Hook. The destination tide engine below does <b>not</b> model Hell Gate / East River current windows, traffic-control requirements, bridge restrictions or New York Harbor routing. Use the combined map for destination planning, then build the transit separately with current NOAA navigation products and local knowledge.</p></div>
+  </section>
+
+  <div class="sectionhead"><div><div class="eyebrow">Destination desk</div><h2>Verified places you can reach by boat</h2></div><p id="countLabel">Loading…</p></div>
+  <section class="grid" id="cards"></section>
+
+  <section class="panel methodology">
+    <h2>How to read the depth estimate</h2>
+    <p><b>Estimated dock depth at arrival</b> = published low-water dock baseline + NOAA predicted tide relative to MLLW. Where a separate approach baseline exists, the site also computes approach depth and treats the shallower of the two as controlling. If the restaurant or marina does not publish a defensible low-water baseline, the tide curve is shown but no dock depth is manufactured.</p>
+    <p><b>Important:</b> predicted astronomical tide is not observed water level. Wind, barometric pressure, river flow, dredging and shoaling can materially change actual depth. Confirm current conditions with the dockmaster and use current NOAA ENC / Coast Pilot / Local Notice to Mariners plus the vessel’s depth sounder.</p>
+  </section>
+
+  <footer>Unified Dock & Dine · Fairfield County CT + Monmouth County NJ · September 2026 verification set.</footer>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
