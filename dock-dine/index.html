@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://tile.openstreetmap.org">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="route-planner.css" />
 </head>
 <body>
 <div class="shell">
@@ -49,9 +50,28 @@
     <div class="mapfoot">Base map © OpenStreetMap contributors · seamarks © OpenSeaMap contributors. Destination pins indicate verified customer/transient access paths; they are not waypoints or courses to steer.</div>
   </section>
 
+  <section id="tripLab" class="panel trip-lab">
+    <div class="triptop">
+      <div><div class="eyebrow">Trip Lab · NOAA current optimizer</div><h2>Time the East River instead of fighting it.</h2><p>First live corridor: Harbor Point, Stamford ↔ Highlands. The model tests departures every 10 minutes, projects NOAA-predicted tidal currents onto your direction of travel, and checks known departure/arrival water depth against the same draft + UKC you set above.</p></div>
+      <div class="betabadge">Live beta</div>
+    </div>
+    <div class="tripcontrols">
+      <div class="tripfield"><label for="tripDirection">Direction</label><select id="tripDirection"><option value="south">Stamford → Highlands</option><option value="north">Highlands → Stamford</option></select></div>
+      <div class="tripfield"><label for="tripOrigin">Origin dock</label><select id="tripOrigin"></select></div>
+      <div class="tripfield"><label for="tripDestination">Destination dock</label><select id="tripDestination"></select></div>
+      <div class="tripfield"><label for="tripDate">Travel date</label><input id="tripDate" type="date" /></div>
+      <div class="tripfield"><label for="tripSpeed">Cruise speed (kt)</label><input id="tripSpeed" type="number" min="5" max="70" step="1" value="24" /></div>
+      <div class="tripfield"><label for="tripEarliest">Earliest depart</label><input id="tripEarliest" type="time" value="06:00" step="600" /></div>
+      <div class="tripfield"><label for="tripLatest">Latest depart</label><input id="tripLatest" type="time" value="16:00" step="600" /></div>
+      <button id="optimizeTrip" class="tripgo">Find best departure</button>
+    </div>
+    <div id="tripStatus" class="tripstatus">Choose your boat speed and departure window, then let NOAA currents do the rest.</div>
+    <div id="tripResults" class="tripresults"></div>
+  </section>
+
   <section id="passage" class="panel passage">
     <div class="passageicon">↔</div>
-    <div><div class="eyebrow">Between the two regions</div><h2>Fairfield ↔ Monmouth is a passage, not a restaurant hop.</h2><p>The practical water route normally runs from western Long Island Sound through the East River / New York Harbor system and then toward Sandy Hook. The destination tide engine below does <b>not</b> model Hell Gate / East River current windows, traffic-control requirements, bridge restrictions or New York Harbor routing. Use the combined map for destination planning, then build the transit separately with current NOAA navigation products and local knowledge.</p></div>
+    <div><div class="eyebrow">Between the two regions</div><h2>Fairfield ↔ Monmouth is now a timed passage.</h2><p>The Trip Lab models the dominant tidal-current corridor through the East River and New York Harbor for the Stamford ↔ Highlands beta route. It still does <b>not</b> replace navigation planning: wind/waves, traffic, security zones, bridge restrictions, speed/no-wake rules and real-time anomalies remain outside the model.</p></div>
   </section>
 
   <div class="sectionhead"><div><div class="eyebrow">Destination desk</div><h2>Verified places you can reach by boat</h2></div><p id="countLabel">Loading…</p></div>
@@ -67,5 +87,6 @@
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
+<script src="route-planner.js"></script>
 </body>
 </html>
