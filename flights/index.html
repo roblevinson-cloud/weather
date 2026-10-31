@@ -25,9 +25,9 @@
   @media (orientation:portrait){ #side{border-left:none;border-top:1px solid var(--line)} }
 
   .top{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
-  .brand{font-weight:800;letter-spacing:.12em;font-size:13px;color:var(--muted)}
+  .brand{white-space:nowrap;font-weight:800;letter-spacing:.12em;font-size:13px;color:var(--muted)}
   .brand b{color:var(--accent)}
-  .status{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
+  .status{font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap;color:var(--muted);display:flex;gap:8px;align-items:center}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good)}
   .dot.err{background:var(--bad);box-shadow:0 0 8px var(--bad)}
   .gear{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 10px;font-size:14px}
@@ -149,9 +149,10 @@ const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>'
 
 /* ---------- map ---------- */
 const map = L.map('map',{zoomControl:false, attributionControl:true}).setView([S.lat,S.lon], 10);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+const CARTO_KEY = 'cb1_30gp_1_dce0df123d1098339bfae02b';   // same key as the broadband fiber map
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key='+CARTO_KEY,{
   maxZoom:18, subdomains:'abcd',
-  attribution:'© OpenStreetMap © CARTO · data: adsb.lol / adsbdb'}).addTo(map);
+  attribution:'© OpenStreetMap © CARTO · data: adsb.lol · airplanes.live · adsb.fi · adsbdb'}).addTo(map);
 let home = L.circleMarker([S.lat,S.lon],{radius:7,color:'#3fa9ff',fillColor:'#3fa9ff',fillOpacity:1}).addTo(map);
 let ring = L.circle([S.lat,S.lon],{radius:S.radius*1609.34,color:'#3fa9ff',weight:1,opacity:.35,fill:false,dashArray:'4 6'}).addTo(map);
 function fitHome(){ map.fitBounds(ring.getBounds(),{padding:[20,20]}); }
@@ -171,9 +172,38 @@ function planeIcon(track, selected, onGround){
 }
 
 /* ---------- data ---------- */
+// Some free APIs don't allow calls straight from a web page (CORS), so each request
+// tries direct first, then a few public relay proxies. Whatever works is remembered.
+const VIA = [
+  u => u,
+  u => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u),
+  u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+  u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+];
+const viaPref = {};  // host -> index of the route that last worked
+let lastSource = '';
+async function getJSON(url, timeoutMs=7000){
+  const host = new URL(url).host;
+  const order = [...VIA.keys()]; const pref = viaPref[host];
+  if (pref!=null){ order.splice(order.indexOf(pref),1); order.unshift(pref); }
+  let lastErr;
+  for (const i of order){
+    const ctl = new AbortController(); const t = setTimeout(()=>ctl.abort(), timeoutMs);
+    try{
+      const r = await fetch(VIA[i](url), {cache:'no-store', signal:ctl.signal});
+      clearTimeout(t);
+      if (r.status===404) { viaPref[host]=i; return null; }       // real "not found" from the API
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      const j = await r.json(); viaPref[host]=i; return j;
+    }catch(e){ clearTimeout(t); lastErr=e; }
+  }
+  throw lastErr || new Error('unreachable');
+}
+
 const FEEDS = [
-  (lat,lon,nm)=>`https://api.adsb.lol/v2/point/${lat}/${lon}/${nm}`,
-  (lat,lon,nm)=>`https://api.airplanes.live/v2/point/${lat}/${lon}/${nm}`,
+  ['adsb.lol',       (lat,lon,nm)=>`https://api.adsb.lol/v2/point/${lat}/${lon}/${nm}`],
+  ['airplanes.live', (lat,lon,nm)=>`https://api.airplanes.live/v2/point/${lat}/${lon}/${nm}`],
+  ['adsb.fi',        (lat,lon,nm)=>`https://opendata.adsb.fi/api/v2/lat/${lat}/lon/${lon}/dist/${nm}`],
 ];
 let feedIdx = 0;
 async function fetchAircraft(){
@@ -182,9 +212,10 @@ async function fetchAircraft(){
   for (let i=0;i<FEEDS.length;i++){
     const idx=(feedIdx+i)%FEEDS.length;
     try{
-      const r = await fetch(FEEDS[idx](S.lat.toFixed(4),S.lon.toFixed(4),nm),{cache:'no-store'});
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      const j = await r.json(); feedIdx = idx; return j.ac || j.aircraft || [];
+      const j = await getJSON(FEEDS[idx][1](S.lat.toFixed(4),S.lon.toFixed(4),nm));
+      if(!j) throw new Error('empty');
+      feedIdx = idx; lastSource = FEEDS[idx][0];
+      return j.ac || j.aircraft || [];
     }catch(e){ lastErr=e; }
   }
   throw lastErr;
@@ -195,16 +226,16 @@ async function getRoute(cs){
   if(!cs) return null;
   if(cs in routeCache) return routeCache[cs];
   routeCache[cs] = null;
-  try{ const r = await fetch(`https://api.adsbdb.com/v0/callsign/${encodeURIComponent(cs)}`);
-    if(r.ok){ const j=await r.json(); routeCache[cs] = j.response?.flightroute || null; } }catch(e){}
-  return routeCache[cs];
+  try{ const j = await getJSON(`https://api.adsbdb.com/v0/callsign/${encodeURIComponent(cs)}`);
+       routeCache[cs] = j?.response?.flightroute || null; }catch(e){ delete routeCache[cs]; }
+  return routeCache[cs] ?? null;
 }
 async function getAircraftInfo(hex){
   if(hex in acCache) return acCache[hex];
   acCache[hex] = null;
-  try{ const r = await fetch(`https://api.adsbdb.com/v0/aircraft/${hex}`);
-    if(r.ok){ const j=await r.json(); acCache[hex] = j.response?.aircraft || null; } }catch(e){}
-  return acCache[hex];
+  try{ const j = await getJSON(`https://api.adsbdb.com/v0/aircraft/${hex}`);
+       acCache[hex] = j?.response?.aircraft || null; }catch(e){ delete acCache[hex]; }
+  return acCache[hex] ?? null;
 }
 
 /* ---------- state + render ---------- */
@@ -230,9 +261,9 @@ async function tick(){
       selected = (planes.find(p=>!p.ground) || planes[0])?.hex || null;
     }
     drawMarkers(); drawList(); await drawCard();
-    $('dot').className='dot'; $('stat').textContent = `${planes.length} aircraft · ${new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
+    $('dot').className='dot'; $('stat').textContent = `${planes.length} aircraft · ${lastSource} · ${new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
   }catch(e){
-    $('dot').className='dot err'; $('stat').textContent='feed error, retrying';
+    $('dot').className='dot err'; $('stat').textContent='no feed ('+(e.message||'blocked')+'), retrying';
     console.error(e);
   }
 }
