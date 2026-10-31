@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Overhead">
+<title>Overhead — Live Flights</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#121826; --line:#1f2a3d; --text:#e8edf6; --muted:#8a96ab;
+    --accent:#ffb020; --accent2:#3fa9ff; --good:#38d39f; --bad:#ff5d6c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none}
+  #app{display:grid;grid-template-columns:1fr 400px;height:100vh;height:100dvh;
+       padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  @media (orientation:portrait){ #app{grid-template-columns:1fr;grid-template-rows:55% 45%} }
+  #map{height:100%;width:100%;background:#0b0f17}
+  #side{background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+  @media (orientation:portrait){ #side{border-left:none;border-top:1px solid var(--line)} }
+
+  .top{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .brand{font-weight:800;letter-spacing:.12em;font-size:13px;color:var(--muted)}
+  .brand b{color:var(--accent)}
+  .status{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good)}
+  .dot.err{background:var(--bad);box-shadow:0 0 8px var(--bad)}
+  .gear{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 10px;font-size:14px}
+
+  #card{padding:18px;border-bottom:1px solid var(--line);overflow:auto}
+  .empty{color:var(--muted);text-align:center;padding:40px 10px;font-size:15px}
+  .cs{font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:700;color:var(--accent);line-height:1}
+  .airline{color:var(--muted);margin-top:4px;font-size:15px}
+  .photo{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;margin:14px 0 4px;background:#0003}
+  .route{display:flex;align-items:center;justify-content:space-between;margin:16px 0 6px}
+  .ap{text-align:center;min-width:80px}
+  .ap .code{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700}
+  .ap .city{font-size:12px;color:var(--muted);max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar{flex:1;height:4px;background:var(--line);margin:0 10px;border-radius:2px;position:relative}
+  .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent2);border-radius:2px}
+  .bar span{position:absolute;top:-10px;transform:translateX(-50%) rotate(90deg);font-size:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .stat{background:#0b0f17;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .stat .k{font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+  .stat .v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;margin-top:2px}
+  .stat .v small{font-size:13px;color:var(--muted);font-weight:500}
+  .up{color:var(--good)} .down{color:var(--bad)}
+
+  #list{flex:1;overflow:auto;min-height:0}
+  .row{display:grid;grid-template-columns:1fr auto auto;gap:10px;padding:11px 18px;border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:14px;align-items:center}
+  .row.sel{background:#1a2336}
+  .row .c{font-weight:700} .row .m{color:var(--muted);font-size:12px}
+
+  .plane{transition:transform .9s linear}
+  .leaflet-container{font-family:inherit}
+  .leaflet-control-attribution{background:#0008!important;color:#666!important;font-size:9px}
+  .leaflet-control-attribution a{color:#888!important}
+  .lbl{font-family:'JetBrains Mono',monospace;font-size:11px;color:#fff;background:#000a;padding:1px 4px;border-radius:3px;white-space:nowrap}
+
+  #settings{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:2000}
+  #settings.open{display:flex}
+  .sheet{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;width:min(420px,92vw)}
+  .sheet h3{margin:0 0 14px}
+  .sheet label{display:block;font-size:12px;color:var(--muted);margin:12px 0 4px;letter-spacing:.06em;text-transform:uppercase}
+  .sheet input,.sheet select{width:100%;background:#0b0f17;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:16px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btns{display:flex;gap:10px;margin-top:18px}
+  .btn{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0b0f17;color:var(--text);font-size:15px;font-weight:600}
+  .btn.pri{background:var(--accent);color:#111;border-color:var(--accent)}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="map"></div>
+  <div id="side">
+    <div class="top">
+      <div class="brand"><b>✈</b> OVERHEAD</div>
+      <div class="status"><span class="dot" id="dot"></span><span id="stat">starting…</span>
+        <button class="gear" id="gearBtn">⚙︎</button></div>
+    </div>
+    <div id="card"><div class="empty">Looking for aircraft…</div></div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<div id="settings">
+  <div class="sheet">
+    <h3>Settings</h3>
+    <button class="btn" id="locBtn" style="width:100%">📍 Use my current location</button>
+    <div class="two">
+      <div><label>Latitude</label><input id="sLat" inputmode="decimal"></div>
+      <div><label>Longitude</label><input id="sLon" inputmode="decimal"></div>
+    </div>
+    <div class="two">
+      <div><label>Radius (miles)</label><input id="sRad" inputmode="numeric"></div>
+      <div><label>Units</label><select id="sUnits"><option value="imp">ft / mph</option><option value="met">m / km/h</option></select></div>
+    </div>
+    <label>Ignore planes above (ft, 0 = no limit)</label><input id="sMaxAlt" inputmode="numeric">
+    <div class="hint" id="locMsg"></div>
+    <div class="btns"><button class="btn" id="cancelBtn">Cancel</button><button class="btn pri" id="saveBtn">Save</button></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ---------- settings ---------- */
+const DEFAULTS = { lat: 40.7128, lon: -74.0060, radius: 15, units: 'imp', maxAlt: 0 };
+function loadSettings(){
+  let s = {...DEFAULTS};
+  try { Object.assign(s, JSON.parse(localStorage.getItem('overhead') || '{}')); } catch(e){}
+  const q = new URLSearchParams(location.search);           // ?lat=..&lon=..&r=..
+  if (q.get('lat')) s.lat = +q.get('lat');
+  if (q.get('lon')) s.lon = +q.get('lon');
+  if (q.get('r'))   s.radius = +q.get('r');
+  return s;
+}
+let S = loadSettings();
+const firstRun = (()=>{ try{ return !localStorage.getItem('overhead') && !location.search.includes('lat'); }catch(e){ return false; } })();
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const R_NM = 3440.065, toRad = d => d*Math.PI/180, toDeg = r => r*180/Math.PI;
+function distNm(a,b,c,d){ const x=toRad(c-a), y=toRad(d-b);
+  const h=Math.sin(x/2)**2+Math.cos(toRad(a))*Math.cos(toRad(c))*Math.sin(y/2)**2; return 2*R_NM*Math.asin(Math.sqrt(h)); }
+function gcPath(lat1,lon1,lat2,lon2,n=64){ // great-circle points
+  const p1=[toRad(lat1),toRad(lon1)], p2=[toRad(lat2),toRad(lon2)];
+  const d=2*Math.asin(Math.sqrt(Math.sin((p2[0]-p1[0])/2)**2+Math.cos(p1[0])*Math.cos(p2[0])*Math.sin((p2[1]-p1[1])/2)**2));
+  if (d===0) return [[lat1,lon1]];
+  const out=[]; for(let i=0;i<=n;i++){ const f=i/n, A=Math.sin((1-f)*d)/Math.sin(d), B=Math.sin(f*d)/Math.sin(d);
+    const x=A*Math.cos(p1[0])*Math.cos(p1[1])+B*Math.cos(p2[0])*Math.cos(p2[1]);
+    const y=A*Math.cos(p1[0])*Math.sin(p1[1])+B*Math.cos(p2[0])*Math.sin(p2[1]);
+    const z=A*Math.sin(p1[0])+B*Math.sin(p2[0]);
+    out.push([toDeg(Math.atan2(z,Math.hypot(x,y))), toDeg(Math.atan2(y,x))]); }
+  // unwrap longitudes so the line doesn't jump across the antimeridian
+  for(let i=1;i<out.length;i++){ while(out[i][1]-out[i-1][1]>180) out[i][1]-=360; while(out[i][1]-out[i-1][1]<-180) out[i][1]+=360; }
+  return out; }
+const imp = () => S.units === 'imp';
+const fmtAlt = ft => ft==null||ft==='ground' ? 'GND' : imp() ? Math.round(ft).toLocaleString()+'<small> ft</small>' : Math.round(ft*0.3048).toLocaleString()+'<small> m</small>';
+const fmtSpd = kt => kt==null ? '—' : imp() ? Math.round(kt*1.15078)+'<small> mph</small>' : Math.round(kt*1.852)+'<small> km/h</small>';
+const fmtDist = nm => imp() ? (nm*1.15078).toFixed(1)+' mi' : (nm*1.852).toFixed(1)+' km';
+const compass = d => ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8];
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- map ---------- */
+const map = L.map('map',{zoomControl:false, attributionControl:true}).setView([S.lat,S.lon], 10);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+  maxZoom:18, subdomains:'abcd',
+  attribution:'© OpenStreetMap © CARTO · data: adsb.lol / adsbdb'}).addTo(map);
+let home = L.circleMarker([S.lat,S.lon],{radius:7,color:'#3fa9ff',fillColor:'#3fa9ff',fillOpacity:1}).addTo(map);
+let ring = L.circle([S.lat,S.lon],{radius:S.radius*1609.34,color:'#3fa9ff',weight:1,opacity:.35,fill:false,dashArray:'4 6'}).addTo(map);
+function fitHome(){ map.fitBounds(ring.getBounds(),{padding:[20,20]}); }
+fitHome();
+
+const routeLayer = L.layerGroup().addTo(map);
+const trailLayer = L.layerGroup().addTo(map);
+const markers = {};   // hex -> marker
+const trails = {};    // hex -> [[lat,lon],...]
+
+function planeIcon(track, selected, onGround){
+  const col = selected ? '#ffb020' : onGround ? '#667' : '#e8edf6';
+  const size = selected ? 38 : 28;
+  return L.divIcon({className:'', iconSize:[size,size], iconAnchor:[size/2,size/2],
+    html:`<svg class="plane" width="${size}" height="${size}" viewBox="0 0 24 24" style="transform:rotate(${track||0}deg);filter:drop-shadow(0 0 3px #000)">
+      <path fill="${col}" d="M12 2c.8 0 1.3.9 1.3 2v5.2l7.7 4.6v2l-7.7-2.4v4.9l2.2 1.7v1.6L12 20.6l-3.5 1v-1.6l2.2-1.7v-4.9L3 15.8v-2l7.7-4.6V4c0-1.1.5-2 1.3-2z"/></svg>`});
+}
+
+/* ---------- data ---------- */
+const FEEDS = [
+  (lat,lon,nm)=>`https://api.adsb.lol/v2/point/${lat}/${lon}/${nm}`,
+  (lat,lon,nm)=>`https://api.airplanes.live/v2/point/${lat}/${lon}/${nm}`,
+];
+let feedIdx = 0;
+async function fetchAircraft(){
+  const nm = Math.max(1, Math.round(S.radius/1.15078));
+  let lastErr;
+  for (let i=0;i<FEEDS.length;i++){
+    const idx=(feedIdx+i)%FEEDS.length;
+    try{
+      const r = await fetch(FEEDS[idx](S.lat.toFixed(4),S.lon.toFixed(4),nm),{cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const j = await r.json(); feedIdx = idx; return j.ac || j.aircraft || [];
+    }catch(e){ lastErr=e; }
+  }
+  throw lastErr;
+}
+
+const routeCache = {}, acCache = {};
+async function getRoute(cs){
+  if(!cs) return null;
+  if(cs in routeCache) return routeCache[cs];
+  routeCache[cs] = null;
+  try{ const r = await fetch(`https://api.adsbdb.com/v0/callsign/${encodeURIComponent(cs)}`);
+    if(r.ok){ const j=await r.json(); routeCache[cs] = j.response?.flightroute || null; } }catch(e){}
+  return routeCache[cs];
+}
+async function getAircraftInfo(hex){
+  if(hex in acCache) return acCache[hex];
+  acCache[hex] = null;
+  try{ const r = await fetch(`https://api.adsbdb.com/v0/aircraft/${hex}`);
+    if(r.ok){ const j=await r.json(); acCache[hex] = j.response?.aircraft || null; } }catch(e){}
+  return acCache[hex];
+}
+
+/* ---------- state + render ---------- */
+let planes = [], selected = null, userPicked = false;
+
+async function tick(){
+  try{
+    let ac = await fetchAircraft();
+    ac = ac.filter(a => a.lat!=null && a.lon!=null).map(a => {
+      const alt = a.alt_baro==='ground' ? 0 : (a.alt_baro ?? a.alt_geom);
+      return { hex:a.hex, cs:(a.flight||'').trim(), reg:a.r, type:a.t, desc:a.desc,
+        lat:a.lat, lon:a.lon, alt, ground:a.alt_baro==='ground', gs:a.gs, track:a.track ?? a.true_heading ?? 0,
+        vr:a.baro_rate ?? a.geom_rate, squawk:a.squawk,
+        dist: distNm(S.lat,S.lon,a.lat,a.lon) };
+    });
+    if (S.maxAlt>0) ac = ac.filter(a => a.ground || (a.alt??0) <= S.maxAlt);
+    ac.sort((a,b)=>a.dist-b.dist);
+    planes = ac;
+
+    // keep the user's pick if still visible, otherwise follow the closest airborne plane
+    if(!userPicked || !planes.find(p=>p.hex===selected)){
+      userPicked = false;
+      selected = (planes.find(p=>!p.ground) || planes[0])?.hex || null;
+    }
+    drawMarkers(); drawList(); await drawCard();
+    $('dot').className='dot'; $('stat').textContent = `${planes.length} aircraft · ${new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
+  }catch(e){
+    $('dot').className='dot err'; $('stat').textContent='feed error, retrying';
+    console.error(e);
+  }
+}
+
+function drawMarkers(){
+  const seen = new Set();
+  for(const p of planes){
+    seen.add(p.hex);
+    const sel = p.hex===selected;
+    (trails[p.hex] ||= []).push([p.lat,p.lon]); if(trails[p.hex].length>60) trails[p.hex].shift();
+    if(!markers[p.hex]){
+      markers[p.hex] = L.marker([p.lat,p.lon],{icon:planeIcon(p.track,sel,p.ground)}).addTo(map)
+        .on('click',()=>select(p.hex));
+      markers[p.hex].bindTooltip('',{permanent:true,direction:'right',offset:[12,0],className:'lbl'});
+    } else {
+      markers[p.hex].setLatLng([p.lat,p.lon]).setIcon(planeIcon(p.track,sel,p.ground));
+    }
+    markers[p.hex].setTooltipContent(esc(p.cs || p.reg || p.hex)).setZIndexOffset(sel?1000:0);
+  }
+  for(const h in markers) if(!seen.has(h)){ map.removeLayer(markers[h]); delete markers[h]; delete trails[h]; }
+  trailLayer.clearLayers();
+  if(selected && trails[selected]?.length>1)
+    L.polyline(trails[selected],{color:'#ffb020',weight:3,opacity:.9}).addTo(trailLayer);
+}
+
+function drawList(){
+  $('list').innerHTML = planes.map(p=>`
+    <div class="row ${p.hex===selected?'sel':''}" data-hex="${p.hex}">
+      <div><div class="c">${esc(p.cs||p.reg||p.hex.toUpperCase())}</div><div class="m">${esc(p.type||'')} ${esc(p.reg||'')}</div></div>
+      <div class="m">${p.ground?'GND':(p.alt!=null?(imp()?Math.round(p.alt/100)*100+' ft':Math.round(p.alt*0.3048)+' m'):'')}</div>
+      <div class="m">${fmtDist(p.dist)}</div>
+    </div>`).join('');
+  $('list').querySelectorAll('.row').forEach(el=>el.onclick=()=>select(el.dataset.hex));
+}
+
+function select(hex){ selected=hex; userPicked=true; drawMarkers(); drawList(); drawCard(); }
+
+let cardToken = 0;
+async function drawCard(){
+  const p = planes.find(x=>x.hex===selected);
+  routeLayer.clearLayers();
+  if(!p){ $('card').innerHTML = `<div class="empty">No aircraft within ${S.radius} mi right now.<br>Try a bigger radius in ⚙︎</div>`; return; }
+  const token = ++cardToken;
+  const [route, info] = await Promise.all([getRoute(p.cs), getAircraftInfo(p.hex)]);
+  if(token!==cardToken) return;   // a newer render started
+
+  const o = route?.origin, d = route?.destination;
+  let progress = null;
+  if(o && d){
+    const a = distNm(o.latitude,o.longitude,p.lat,p.lon), b = distNm(p.lat,p.lon,d.latitude,d.longitude);
+    progress = Math.min(1,Math.max(0,a/(a+b)));
+    L.polyline(gcPath(o.latitude,o.longitude,p.lat,p.lon),{color:'#3fa9ff',weight:2,opacity:.8}).addTo(routeLayer);
+    L.polyline(gcPath(p.lat,p.lon,d.latitude,d.longitude),{color:'#3fa9ff',weight:2,opacity:.6,dashArray:'6 8'}).addTo(routeLayer);
+    for(const ap of [o,d]) L.circleMarker([ap.latitude,ap.longitude],{radius:5,color:'#3fa9ff',fillColor:'#0b0f17',fillOpacity:1,weight:2})
+      .bindTooltip(ap.iata_code||ap.icao_code,{permanent:true,direction:'top',className:'lbl'}).addTo(routeLayer);
+  }
+  const airline = route?.airline?.name || info?.registered_owner || '';
+  const typeName = [info?.manufacturer, info?.type].filter(Boolean).join(' ') || p.desc || p.type || '';
+  const photo = info?.url_photo_thumbnail || info?.url_photo;
+  const vr = p.vr ?? 0;
+  const vrTxt = Math.abs(vr) < 64 ? 'Level' : (vr>0?'▲ ':'▼ ') + (imp()? Math.abs(Math.round(vr))+'<small> ft/m</small>' : Math.abs(Math.round(vr*0.3048))+'<small> m/m</small>');
+
+  $('card').innerHTML = `
+    <div class="cs">${esc(p.cs || p.reg || p.hex.toUpperCase())}</div>
+    <div class="airline">${esc(airline)}${airline&&typeName?' · ':''}${esc(typeName)}</div>
+    ${photo?`<img class="photo" src="${esc(photo)}" alt="" onerror="this.remove()">`:''}
+    ${o&&d?`
+    <div class="route">
+      <div class="ap"><div class="code">${esc(o.iata_code||o.icao_code)}</div><div class="city">${esc(o.municipality||o.name)}</div></div>
+      <div class="bar"><i style="width:${progress*100}%"></i><span style="left:${progress*100}%">✈︎</span></div>
+      <div class="ap"><div class="code">${esc(d.iata_code||d.icao_code)}</div><div class="city">${esc(d.municipality||d.name)}</div></div>
+    </div>`:`<div class="airline" style="margin-top:12px">Route unknown</div>`}
+    <div class="grid">
+      <div class="stat"><div class="k">Altitude</div><div class="v">${p.ground?'GND':fmtAlt(p.alt)}</div></div>
+      <div class="stat"><div class="k">Speed</div><div class="v">${fmtSpd(p.gs)}</div></div>
+      <div class="stat"><div class="k">Heading</div><div class="v">${Math.round(p.track)}°<small> ${compass(p.track)}</small></div></div>
+      <div class="stat"><div class="k">Climb</div><div class="v ${vr>64?'up':vr<-64?'down':''}">${vrTxt}</div></div>
+      <div class="stat"><div class="k">Distance</div><div class="v">${fmtDist(p.dist)}</div></div>
+      <div class="stat"><div class="k">Reg / Type</div><div class="v" style="font-size:17px">${esc(p.reg||'—')} <small>${esc(p.type||'')}</small></div></div>
+    </div>`;
+}
+
+/* ---------- settings UI ---------- */
+function openSettings(){ $('sLat').value=S.lat; $('sLon').value=S.lon; $('sRad').value=S.radius; $('sUnits').value=S.units; $('sMaxAlt').value=S.maxAlt; $('locMsg').textContent=''; $('settings').classList.add('open'); }
+$('gearBtn').onclick = openSettings;
+$('cancelBtn').onclick = ()=>$('settings').classList.remove('open');
+$('locBtn').onclick = ()=>{
+  $('locMsg').textContent='Finding you…';
+  if(!navigator.geolocation){ $('locMsg').textContent='Location not available — enter it manually.'; return; }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    $('sLat').value=pos.coords.latitude.toFixed(4); $('sLon').value=pos.coords.longitude.toFixed(4); $('locMsg').textContent='Got it. Tap Save.';
+  }, err=>{ $('locMsg').textContent='Couldn\'t get location ('+err.message+'). Enter it manually.'; }, {enableHighAccuracy:false,timeout:10000});
+};
+$('saveBtn').onclick = ()=>{
+  S = { lat:+$('sLat').value||DEFAULTS.lat, lon:+$('sLon').value||DEFAULTS.lon, radius:Math.min(250,Math.max(1,+$('sRad').value||15)),
+        units:$('sUnits').value, maxAlt:Math.max(0,+$('sMaxAlt').value||0) };
+  try{ localStorage.setItem('overhead', JSON.stringify(S)); }catch(e){}
+  home.setLatLng([S.lat,S.lon]); ring.setLatLng([S.lat,S.lon]).setRadius(S.radius*1609.34); fitHome();
+  $('settings').classList.remove('open'); userPicked=false; tick();
+};
+
+/* ---------- keep the screen awake (iPadOS 16.4+) ---------- */
+let wake=null;
+async function keepAwake(){ try{ if('wakeLock' in navigator) wake = await navigator.wakeLock.request('screen'); }catch(e){} }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') keepAwake(); });
+document.addEventListener('click', keepAwake, {once:true});
+keepAwake();
+
+/* ---------- go ---------- */
+if(firstRun) openSettings();
+tick();
+setInterval(tick, 8000);
+</script>
+</body>
+</html>
